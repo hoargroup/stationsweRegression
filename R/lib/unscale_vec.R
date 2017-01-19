@@ -1,0 +1,10 @@
+unscale_vec<-function(vec){
+if(length(which(is.na(vec)))==length(vec)){
+     return(NA)
+}
+     avg=attr(vec,'scaled:center')
+     std=attr(vec,'scaled:scale')
+     return(
+          vec*std+avg
+          )
+}
