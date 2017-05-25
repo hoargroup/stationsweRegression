@@ -60,7 +60,7 @@ the directory structure is therefore
 		* phv
 		* gis
 
-I have an r script to make the phv geotif files. There will be/is [another vignette](Make_PHV_Inputs.html) with this information.
+I have an r script to make the phv geotif files. There is [another vignette](Make_PHV_Inputs.html) with this information.
 
 
 ## csv datefile
@@ -70,4 +70,4 @@ There should be a single column with a header called `dte` and the date format s
 
 # Run file
 
-see [example run file](https://www.github.com/dschneiderch/ddddd)
+see an [example run file](https://github.com/hoargroup/example_sweRegression/blob/master/run_ucrb.R) on github. Here is a [plain text version](https://raw.githubusercontent.com/hoargroup/example_sweRegression/master/run_ucrb.R) you can copy as a template.
