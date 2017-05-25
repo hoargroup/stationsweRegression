@@ -10,8 +10,12 @@
 get_modscag_data=function(doy=NULL,
 													yr=NULL,
 													type=NULL,
-													imagepath=NULL
-){
+													imagepath=NULL,
+													reso,
+													xmin,
+													xmax,
+													ymin,
+													ymax){
 	simfscafilename=paste0(imagepath,'/modscag_fsca_',yr,doy,'.tif')
 	if(file.exists(simfscafilename)) {
 		print('fsca image exists. nothing to do. returning fsca.')
@@ -20,9 +24,8 @@ get_modscag_data=function(doy=NULL,
 	}
 
 	if(type=='NRT'){
-		modscag_download_script=system.file('sh','get_modscag.sh',package='stationsweRegression')
-		print(modscag_download_script)
-		system(paste('source ',modscag_download_script,' ',doy, yr))
+		print('not available right now')
+
 	}
 
 	if(type=='historic'){
@@ -40,7 +43,7 @@ get_modscag_data=function(doy=NULL,
 				return(raster())
 			}
 		}
-		gdalUtils::gdalwarp(tiffiles,simfscafilename,t_srs = '+proj=longlat +datum=WGS84',te = c(-117.25,42,-106.15,49),tr=c(0.00416666667,0.0041666667),r='near')
+		gdalUtils::gdalwarp(tiffiles,simfscafilename,t_srs = '+proj=longlat +datum=WGS84',te = c(xmin,ymin,xmax,ymax),tr=c(reso,reso),r='near')
 
 		# modscag_mosaic_script=system.file('sh','mosaic_modscag.sh',package='stationsweRegression')
 		# system(paste('source ',modscag_mosaic_script,' ',doy, yr))

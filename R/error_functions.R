@@ -1,7 +1,8 @@
-#' error functions
+#' r-square
 #'
 #' @param model model object
 #' @param data dataframe to predict with modelobj
+#' @details there are two rsquare functions because I clipped them from different pieces of code. They take different types of inputs but perform the same calculation.
 #' @export
 
 myr2=function(model,data){
@@ -9,7 +10,7 @@ myr2=function(model,data){
 	stats::cor(predict(model, data), as.data.frame(data)[[yvar]], use='complete.obs')^2
 }
 
-#' error functions
+#' mean absolute error as percent of mean obs
 #'
 #' @param model model object
 #' @param data dataframe to predict with modelobj
@@ -20,16 +21,17 @@ mypctmae=function(model,data) {
 	mae(model,data)/mean(as.data.frame(data)[[yvar]],na.rm=T)*100
 }
 
-#' error functions
+#' r-square
 #'
 #' @param yobs observed
 #' @param yhat predicted
+#' @details there are two rsquare functions because I clipped them from different pieces of code. They take different types of inputs but perform the same calculation.
 #' @export
 r2=function(yobs,yhat){
 	cor(yobs,yhat,use='complete.obs')^2
 }
 
-#' error functions
+#' root mean squared error
 #'
 #' @param yobs observed
 #' @param yhat predicted
