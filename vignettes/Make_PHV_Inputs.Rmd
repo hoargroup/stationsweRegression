@@ -25,4 +25,4 @@ These are the predictors currently being used to estimate SWE. If you add/remove
 * dist2coast (shortest distance to the ocean)
 * dist2contdiv (shortest distance to the continental divide. pixels west of the divide are negative)
 
-for now making phv inputs is only documented for the `idwy` domain on [github](https://github.com/hoargroup/example_sweRegression/blob/master/idwy/preprocess_phv/create_input_rasters.R). Raw text file is [here](https://raw.githubusercontent.com/hoargroup/example_sweRegression/master/idwy/preprocess_phv/create_input_raster.R)
+for now making phv inputs is only documented for the `idwy` domain on [github](https://github.com/hoargroup/example_sweRegression/blob/master/idwy/preprocess_phv/create_input_rasters.R). Raw text file is [here](https://raw.githubusercontent.com/hoargroup/example_sweRegression/master/idwy/preprocess_phv/create_input_rasters.R)
