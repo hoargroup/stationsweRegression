@@ -1,0 +1,73 @@
+---
+title: "Using this package"
+author: "Dominik Schneider"
+date: "`r Sys.Date()`"
+output:	html_vignette
+vignette: >
+  %\VignetteIndexEntry{Using this package}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+
+This document will describe how to set up an R script to run the commands needed to estimate SWE distribution. 
+
+# Intro
+
+This package was written to estimate SWE in the northern Rockies using MODSCAG, SNOTEL observations from within the domain, and some precomputed static topographic variables. I've tried to make the package so it can be extended to use e.g. MOD10A1 and CADWR station observations with the appropriate changes.
+
+# Project setup
+
+You should create a working directory from which to run the functions in this package. It should contain
+
+* a directory named `modscag_downloads`
+* domain directory, e.g. idwy, that will contain information specific to the domain
+* a csv file of the dates you are interested in. This can have any filename, and you will provide the exact name later
+
+## modscag_downloads
+
+The data for this directory will be automatically downloaded from snow server over ssh (with scp) but you need setup a ssh key file. google to troubleshoot if needed but here is an overview (I've only done this on MacOS. I assume linux is the same. No idea about windows):
+
+1. create a directory in your user home called `.ssh`
+
+2. run `ssh-keygen` in terminal (anywhere)
+	+ if it asks for the file in which to save the key make sure it gets saved to /Users/<username>/.ssh/snowserver_rsa
+	+ if it asks for a passphrase just hit enter for none.
+	
+3. there should be snowserver_rsa and snowserver_rsa.pub in the .ssh folder. copy the snowserver_rsa.pub to the .ssh folder in /data/home/<username> on snow server.
+
+4. in terminal, cd to /data/home/<username> on snowserver, run `cat snowserver_rsa.pub >> .ssh/authorized_keys`
+
+5. try ssh'ing to snowserver. it should work without a password.
+	+ NB: I used ssh snowserver.colorado.edu -i ~/.ssh/snowserver_rsa which then prompted me for my key passphrase (which we set to none). I think this confuses the mac because it can't store nothing in the keychain. I hit enter a couple times and then it worked the following ssh attempt. Importantly, after logging in you should see: `Identity added: /Users/dosc3612/.ssh/snowserver_rsa ((null)`
+	+ if not, try `chmod 700 .ssh` on your .ssh folder on snowserver
++ also try `chmod 600 .ssh/snowserver_rsa` on your computer to set the permissions
+
+Alternatively, you can copy the correct modscag date directories from snowserver `/data/hydroData/WestUS_Data/MODSCAG/modscag-historic/` and the package will skip the download. The structure of the modscag-downloads directory should be:
+* year
+*	3 digit day of year
+* geotiff modscag files with names ending in `snow_fraction.tif`
+
+
+## domain directory
+
+This folder should have a `data` directory. Inside `data` are `phv` and `gis`. `phv` contains static predictor variables. For a domain name of `idwy`, they must be labeled `idwy_dem.tif` (for elevation). The package will use all geotif files in this folder and parse the name based on the underscore. `gis` needs to have a watermask named `IDWY_watermask.tif`. This will be used to mask areas that are bodies of water from the estimates. You need to make sure this is on the same grid as the geotiffs in `phv`. One option is to use the MOD44W product from NASA.
+
+the directory structure is therefore
+
+* idwy
+	* data
+		* phv
+		* gis
+
+I have an r script to make the phv geotif files. There will be/is [another vignette](Make_PHV_Inputs.html) with this information.
+
+
+## csv datefile
+
+There should be a single column with a header called `dte` and the date format should be `YYYY-mm-dd`.
+        
+
+# Run file
+
+see [example run file](https://www.github.com/dschneiderch/ddddd)
