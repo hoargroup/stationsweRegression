@@ -5,7 +5,8 @@
 \title{Function to get MODSCAG data
 Either download the near realtime data from snowdav system or use archived historic data}
 \usage{
-get_modscag_data(doy = NULL, yr = NULL, type = NULL, imagepath = NULL)
+get_modscag_data(doy = NULL, yr = NULL, type = NULL, imagepath = NULL,
+  reso, xmin, xmax, ymin, ymax)
 }
 \arguments{
 \item{doy}{day of year}

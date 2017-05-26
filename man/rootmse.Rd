@@ -2,7 +2,7 @@
 % Please edit documentation in R/error_functions.R
 \name{rootmse}
 \alias{rootmse}
-\title{error functions}
+\title{root mean squared error}
 \usage{
 rootmse(yobs, yhat)
 }
@@ -12,5 +12,5 @@ rootmse(yobs, yhat)
 \item{yhat}{predicted}
 }
 \description{
-error functions
+root mean squared error
 }

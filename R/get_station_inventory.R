@@ -9,10 +9,13 @@ get_inv <- function(network='snotel'){
 
 	if(network=='snotel'){
 		nwccinv=read_csv(system.file("extdata","nwcc_snotel_inventory.csv",package='stationsweRegression'))
-		nwccinv <- nwccinv %>% rename(stationid=`station id`)
+		nwccinv <- nwccinv %>%
+			rename(stationid=`station id`) %>%
+			mutate(stationid=as.character(stationid))
 
 		## ---- read more accurate locations, fix station names and create spatial points dF
-		snotellocs=read_csv(system.file("extdata","SNOTEL_MASTER.csv",package='stationsweRegression'))
+		snotellocs=read_csv(system.file("extdata","SNOTEL_MASTER.csv",package='stationsweRegression')) %>%
+			mutate(Site_ID=as.character(Site_ID))
 
 		snotellocs=inner_join(snotellocs,nwccinv,by=c("Site_ID" = "stationid"))
 

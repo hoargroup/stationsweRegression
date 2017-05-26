@@ -25,7 +25,7 @@ get_modscag_data=function(doy=NULL,
 
 	if(type=='NRT'){
 		print('not available right now')
-
+		return()
 	}
 
 	if(type=='historic'){
@@ -43,12 +43,9 @@ get_modscag_data=function(doy=NULL,
 				return(raster())
 			}
 		}
-		gdalUtils::gdalwarp(tiffiles,simfscafilename,t_srs = '+proj=longlat +datum=WGS84',te = c(xmin,ymin,xmax,ymax),tr=c(reso,reso),r='near')
-
-		# modscag_mosaic_script=system.file('sh','mosaic_modscag.sh',package='stationsweRegression')
-		# system(paste('source ',modscag_mosaic_script,' ',doy, yr))
+		simfsca=gdalUtils::gdalwarp(tiffiles,simfscafilename,output_Raster = TRUE,t_srs = '+proj=longlat +datum=WGS84',te = c(xmin,ymin,xmax,ymax),tr=c(reso,reso),r='near',dstnodata='-99')
 
 	}
-	simfsca=raster(simfscafilename)
+
 }
 

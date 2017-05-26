@@ -32,7 +32,8 @@ get_stationswe_data <- function(yr=2017,station_locs,network='snotel'){
 		dat=bind_rows(allfiles)
 		dat=dat[,-ncol(dat)]
 		colnames(dat)=c('Site_ID','dte','time','swe','pcp','tobs','tmax','tmin','tavg','snwd')
-		dat <- tbl_df(dat)
+		dat <- tbl_df(dat) %>%
+			mutate(Site_ID=as.character(Site_ID))
 
 		dat2=full_join(station_locations,
 									 dat,by=c('Site_ID'))

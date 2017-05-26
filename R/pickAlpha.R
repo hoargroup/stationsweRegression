@@ -6,7 +6,7 @@
 #' @details this is a helper function for gnet_phvfsca
 
 pickAlpha=function(dF,myformula,nfolds,cl=cl){
-	cvalpha=cvAlpha.glmnet(myformula,data=dF,nfolds=nfolds,type.measure='mse',outerParallel=cl)
+	cvalpha=cva.glmnet(myformula,data=dF,nfolds=nfolds,type.measure='mse',outerParallel=cl)
 
 	maxlambda=100
 	alpha=cvalpha$alpha

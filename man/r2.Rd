@@ -2,7 +2,7 @@
 % Please edit documentation in R/error_functions.R
 \name{r2}
 \alias{r2}
-\title{error functions}
+\title{r-square}
 \usage{
 r2(yobs, yhat)
 }
@@ -12,5 +12,8 @@ r2(yobs, yhat)
 \item{yhat}{predicted}
 }
 \description{
-error functions
+r-square
+}
+\details{
+there are two rsquare functions because I clipped them from different pieces of code. They take different types of inputs but perform the same calculation.
 }

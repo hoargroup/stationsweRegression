@@ -2,7 +2,7 @@
 % Please edit documentation in R/error_functions.R
 \name{mypctmae}
 \alias{mypctmae}
-\title{error functions}
+\title{mean absolute error as percent of mean obs}
 \usage{
 mypctmae(model, data)
 }
@@ -12,5 +12,5 @@ mypctmae(model, data)
 \item{data}{dataframe to predict with modelobj}
 }
 \description{
-error functions
+mean absolute error as percent of mean obs
 }

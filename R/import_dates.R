@@ -7,10 +7,11 @@
 #'
 
 import_dates <- function(fn){
-	read_csv(DATEFILE) %>%
-		setNames(c('dte')) %>%
+	read_csv(DATEFILE,col_names=TRUE) %>%
+	setNames('dte') %>%
 		mutate(dte=as.Date(dte,'%Y-%m-%d'),
 					 yr=strftime(dte,'%Y'),
 					 doy=strftime(dte,'%j')) %>%
-		arrange(dte)
+		arrange(dte) %>%
+		filter(complete.cases(.))
 }

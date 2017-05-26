@@ -2,7 +2,7 @@
 % Please edit documentation in R/error_functions.R
 \name{myr2}
 \alias{myr2}
-\title{error functions}
+\title{r-square}
 \usage{
 myr2(model, data)
 }
@@ -12,5 +12,8 @@ myr2(model, data)
 \item{data}{dataframe to predict with modelobj}
 }
 \description{
-error functions
+r-square
+}
+\details{
+there are two rsquare functions because I clipped them from different pieces of code. They take different types of inputs but perform the same calculation.
 }

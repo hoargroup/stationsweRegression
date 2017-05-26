@@ -11,6 +11,7 @@ Imports:
     rgdal,
     sp,
     raster,
+    gdalUtils,
     glmnetUtils,
     modelr,
     cowplot,
