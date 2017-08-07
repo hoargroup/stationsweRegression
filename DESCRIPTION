@@ -11,6 +11,7 @@ Suggests:
     rgdal
     sp
     raster 
+    RSAGA
 Imports:
     tidyverse,
     glmnetUtils,
