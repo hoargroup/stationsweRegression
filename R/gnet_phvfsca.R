@@ -1,6 +1,6 @@
 #' Fit the GLM-Net model to the data
-#' @param formula formula to model
 #' @param dF dataframe that includes x and y variables for regression
+#' @param formula formula to model
 #' @param cl a cluster object for parallel execution
 #' @export
 #'

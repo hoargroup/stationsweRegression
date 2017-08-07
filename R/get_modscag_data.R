@@ -1,9 +1,15 @@
 #' Function to get MODSCAG data
 #' Either download the near realtime data from snowdav system or use archived historic data
 #'
-#' @param source 'NRT' or 'historic'. near realtime download from snowdav or archived data
 #' @param doy day of year
 #' @param yr year
+#' @param type 'NRT' or 'historic'. near realtime download from snowdav or archived data
+#' @param imagepath the directory where the mosaiced fsca .tif files exist
+#' @param reso resolution of fsca
+#' @param xmin minimum x coordinate of domain
+#' @param xmax maximum x coordinate of domain
+#' @param ymin minimum y coordinate of domain
+#' @param ymax maximum y coordinate of domain
 #' @export
 #' @details called for its side effect of producing a mosaicked fsca image of the domain
 
