@@ -41,7 +41,8 @@ The data for this directory will be automatically downloaded from snow server ov
 5. try ssh'ing to snowserver. it should work without a password.
 	+ NB: I used ssh snowserver.colorado.edu -i ~/.ssh/snowserver_rsa which then prompted me for my key passphrase (which we set to none). I think this confuses the mac because it can't store nothing in the keychain. I hit enter a couple times and then it worked the following ssh attempt. Importantly, after logging in you should see: `Identity added: /Users/dosc3612/.ssh/snowserver_rsa ((null)`
 	+ if not, try `chmod 700 .ssh` on your .ssh folder on snowserver
-+ also try `chmod 600 .ssh/snowserver_rsa` on your computer to set the permissions
+	+ also try `chmod 600 .ssh/snowserver_rsa` on your computer to set the permissions
+	+ or, recreate the ssh key with a passphrase (rather than not having one)
 
 Alternatively, you can copy the correct modscag date directories from snowserver `/data/hydroData/WestUS_Data/MODSCAG/modscag-historic/` and the package will skip the download. The structure of the modscag-downloads directory should be:
 * year

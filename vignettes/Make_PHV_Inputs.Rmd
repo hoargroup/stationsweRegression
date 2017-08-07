@@ -11,7 +11,7 @@ vignette: >
 
 # Predictor Variables
 
-These are the predictors currently being used to estimate SWE. If you add/remove any then the formula in `gnet_fsca.r` needs to be updated accordingly. For a domain name of `ucrb`, they must be labeled `ucrb_dem.tif` (for elevation). The package will use all geotif files in the `data/phv` folder and parse the name based on the underscore. Each geotif should have the same resolution, extent, grid etc. and should match the values for extent and resolution given in the run file for fSCA. The package was built to use MODIS fSCA so resolution in degrees is 15/3600 or 0.0041666666667 (converted from the modis sinusoidal projection). The projection should be lat/long wgs84 (+epsg=4326)
+These are the predictors currently being used to estimate SWE. If you add/remove any then the formula in your run file needs to be updated accordingly. For a domain name of `ucrb`, they must be labeled `ucrb_dem.tif` (for elevation). The package will use all geotif files in the `data/phv` folder and parse the name based on the underscore. Each geotif should have the same resolution, extent, grid etc. and should match the values for extent and resolution given in the run file for fSCA. The package was built to use MODIS fSCA so resolution in degrees is 15/3600 or 0.0041666666667 (converted from the modis sinusoidal projection). The projection should be lat/long wgs84 (+epsg=4326)
 
 * dem (elevation)
 * lat (latitude)
