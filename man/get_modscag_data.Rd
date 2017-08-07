@@ -13,7 +13,19 @@ get_modscag_data(doy = NULL, yr = NULL, type = NULL, imagepath = NULL,
 
 \item{yr}{year}
 
-\item{source}{'NRT' or 'historic'. near realtime download from snowdav or archived data}
+\item{type}{'NRT' or 'historic'. near realtime download from snowdav or archived data}
+
+\item{imagepath}{the directory where the mosaiced fsca .tif files exist}
+
+\item{reso}{resolution of fsca}
+
+\item{xmin}{minimum x coordinate of domain}
+
+\item{xmax}{maximum x coordinate of domain}
+
+\item{ymin}{minimum y coordinate of domain}
+
+\item{ymax}{maximum y coordinate of domain}
 }
 \description{
 Function to get MODSCAG data

@@ -16,5 +16,5 @@ tibble with (at least) column names Site_ID, site_name, Latitude, Longitude.
 setup and clean station inventory
 }
 \details{
-There is a snotel inventory included with the package from Jan 2016. It can be updated from https://wcc.sc.egov.usda.gov/nwcc/inventory or theoretically replaced with that of a different network
+There is a snotel inventory included with the package from Jan 2017. It can be updated from https://wcc.sc.egov.usda.gov/nwcc/inventory or theoretically replaced with that of a different network
 }

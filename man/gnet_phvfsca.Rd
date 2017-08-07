@@ -4,10 +4,12 @@
 \alias{gnet_phvfsca}
 \title{Fit the GLM-Net model to the data}
 \usage{
-gnet_phvfsca(dF, cl = NULL)
+gnet_phvfsca(dF, formula, cl = NULL)
 }
 \arguments{
 \item{dF}{dataframe that includes x and y variables for regression}
+
+\item{formula}{formula to model}
 
 \item{cl}{a cluster object for parallel execution}
 }
