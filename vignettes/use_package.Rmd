@@ -22,11 +22,23 @@ You should create a working directory from which to run the functions in this pa
 
 * a directory named `modscag_downloads`
 * domain directory, e.g. idwy, that will contain information specific to the domain
-* a csv file of the dates you are interested in. This can have any filename, and you will provide the exact name later
+* a csv file of the dates you are interested in. This can have any filename, and you will provide the exact name and location later
 
 ## modscag_downloads
 
-The data for this directory will be automatically downloaded from snow server over ssh (with scp) but you need setup a ssh key file. google to troubleshoot if needed but here is an overview (I've only done this on MacOS. I assume linux is the same. No idea about windows):
+There are 2 options. Either download the files yourself before running the model, or allow the package to download them for you. 
+
+*Option 1*
+
+You can copy the correct modscag date directories from snowserver `/data/hydroData/WestUS_Data/MODSCAG/modscag-historic/` and the package will skip the download. The structure of the modscag-downloads directory should be:
+* year
+*	3 digit day of year
+* geotiff modscag files with names ending in `snow_fraction.tif`
+
+
+*Option 2*
+
+The package will download them for you after checking to make sure the files don't exist. This option requires some setup of ssh on yoru computer. The data for this directory will be automatically downloaded from snow server over ssh (with scp) but you need setup a ssh key file. google to troubleshoot if needed but here is an overview (I've only done this on MacOS. I assume linux is the same. I think for Windows you'll need Cygwin or MobaXTerm or alike):
 
 1. create a directory in your user home called `.ssh`
 
@@ -34,20 +46,16 @@ The data for this directory will be automatically downloaded from snow server ov
 	+ if it asks for the file in which to save the key make sure it gets saved to /Users/<username>/.ssh/snowserver_rsa
 	+ if it asks for a passphrase just hit enter for none.
 	
-3. there should be snowserver_rsa and snowserver_rsa.pub in the .ssh folder. copy the snowserver_rsa.pub to the .ssh folder in /data/home/<username> on snow server.
+3. run `ssh-copy-id -i ~/.ssh/snowserver_rsa.pub snowserver.colorado.edu` 
 
-4. in terminal, cd to /data/home/<username> on snowserver, run `cat snowserver_rsa.pub >> .ssh/authorized_keys`
-
-5. try ssh'ing to snowserver. it should work without a password.
-	+ NB: I used ssh snowserver.colorado.edu -i ~/.ssh/snowserver_rsa which then prompted me for my key passphrase (which we set to none). I think this confuses the mac because it can't store nothing in the keychain. I hit enter a couple times and then it worked the following ssh attempt. Importantly, after logging in you should see: `Identity added: /Users/dosc3612/.ssh/snowserver_rsa ((null)`
+4. try ssh'ing to snowserver. it should work without a password.
+	+ check to make sure the snowserver_rsa was added to ~/.ssh/authorized_keys 
+	+ NB: I had to use `ssh snowserver.colorado.edu -i ~/.ssh/snowserver_rsa` which then prompted me for my key passphrase (which we set to none). I think this confuses the mac because it can't store nothing in the keychain. I hit enter a couple times and then it worked the following ssh attempt. Importantly, after logging in you should see: `Identity added: /Users/dosc3612/.ssh/snowserver_rsa ((null)`
 	+ if not, try `chmod 700 .ssh` on your .ssh folder on snowserver
 	+ also try `chmod 600 .ssh/snowserver_rsa` on your computer to set the permissions
 	+ or, recreate the ssh key with a passphrase (rather than not having one)
-
-Alternatively, you can copy the correct modscag date directories from snowserver `/data/hydroData/WestUS_Data/MODSCAG/modscag-historic/` and the package will skip the download. The structure of the modscag-downloads directory should be:
-* year
-*	3 digit day of year
-* geotiff modscag files with names ending in `snow_fraction.tif`
+	
+*NB: make sure your username is the same on your local machine and snowserver. otherwise you will need to replace `snowserver.colorado.edu` with `<sslogin>@snowserver.colorado.edu`
 
 
 ## domain directory
