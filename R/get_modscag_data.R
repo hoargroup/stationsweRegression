@@ -1,5 +1,6 @@
-#' Function to get MODSCAG data
-#' Either download the near realtime data from snowdav system or use archived historic data
+#' Function to get MODSCAG data.
+#'
+#' The function will check for existing processed fsca images in the imagepath. If it doesn't exist, it will check for raw, unprocessed files and mosaic them. If no file exist it will attempt to download them from snowserver and mosaic them.
 #'
 #' @param doy day of year
 #' @param yr year
