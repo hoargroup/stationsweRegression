@@ -35,6 +35,8 @@ You can copy the correct modscag date directories from snowserver `/data/hydroDa
 *	3 digit day of year
 * geotiff modscag files with names ending in `snow_fraction.tif`
 
+The package will mosaic these files and crop them for your domain. The processed fsca files will be placed in the folder `data/fsca` inside the domain directory.
+
 
 *Option 2*
 
@@ -60,21 +62,32 @@ The package will download them for you after checking to make sure the files don
 
 ## domain directory
 
-This folder should have a `data` directory. Inside `data` are `phv` and `gis`. `phv` contains static predictor variables. For a domain name of `idwy`, they must be labeled `idwy_dem.tif` (for elevation). The package will use all geotif files in this folder and parse the name based on the underscore. `gis` needs to have a watermask named `IDWY_watermask.tif`. This will be used to mask areas that are bodies of water from the estimates. You need to make sure this is on the same grid as the geotiffs in `phv`. One option is to use the MOD44W product from NASA.
+You will need to create a `data` subdirectory. Inside `data` you will need to create `phv` and `gis`. 
 
-the directory structure is therefore
+`phv` contains static predictor variables that you must provide to the model. For a domain name of `idwy`, they must be labeled `idwy_dem.tif` (for elevation). The package will use all geotif files in this folder and parse the name based on the underscore. 
 
-* idwy
-	* data
-		* phv
-		* gis
+`gis` needs to have a watermask named `IDWY_watermask.tif`. This will be used to mask areas that are bodies of water from the estimates. You need to make sure this is on the same grid as the geotiffs in `phv`. One option is to use the MOD44W product from NASA.
 
+Upon runing the model, 2 additional subfolders (`snoteldownloads` and `fsca`) will be created in the `data` directory. 
+
+An `output` folder will also be created in the domain directory with the results from the model
+
+The resulting folder structure is therefore:
+
+* working directory
+	* idwy (user created)
+		* data (user created)
+			* phv (user created)
+			* gis (user created)
+			* snoteldownloads -> (auto created) the model will download the relevant snotel data here
+			* fsca -> (auto created) the processed modscag files will be written here
+		
 I have an r script to make the phv geotif files. There is [another vignette](Make_PHV_Inputs.html) with this information.
 
 
 ## csv datefile
 
-There should be a single column with a header called `dte` and the date format should be `YYYY-mm-dd`.
+There should be a single column with a header called `dte` and the date format should be `YYYY-mm-dd`. You will provide the name of this file to run the model.
         
 
 # Run file
