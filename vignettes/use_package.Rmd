@@ -9,12 +9,37 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
+# Introduction
 
-This document will describe how to set up an R script to run the commands needed to estimate SWE distribution. 
+This document will describe how to set up an R script to run the commands needed to estimate SWE distribution following the methods described in [Schneider and Molotch, 2016](!http://onlinelibrary.wiley.com/doi/10.1002/2016WR019067/full).
 
-# Intro
+Keep in mind that the package was first developed to estimate SWE distribution in the northern Rockies using a step-wise linear regression between SNOTEL observations (dependent variable), and reconstructed SWE and static topographic variables (independent variables). There are two main modifications you should be aware of:
 
-This package was written to estimate SWE in the northern Rockies using MODSCAG, SNOTEL observations from within the domain, and some precomputed static topographic variables. I've tried to make the package so it can be extended to use e.g. MOD10A1 and CADWR station observations with the appropriate changes.
+- fsca is used as a predictor instead of reconstructed SWE. If you look in the discussion of the paper, we show that this is almost as good as using reconstructed SWE. I've done some more tests and found that the accuracy trade off versus not having to run the reconstruction model for new domains is worthwhile for my immediate purposes.
+
+- the statistical model from the paper was upgraded from a step-wise linear regression to an elastic-net linear regression. in short, this means that all the predictor variables get used rather than dropping the variables with the lowest predictive ability.
+
+I've tried to make the package so it can be extended to use e.g. MOD10A1 fsca and CADWR station observations with the appropriate changes.
+
+
+## Dependent Variable
+### SWE observations
+
+The package will automatically download the snotel observations needed using a bash script.
+
+## Independent Variables 
+### Topographic Variables
+
+The user will need to gather and create the variables needed to model SWE. In short, download a DEM for your region and then compute the terrain variables needed for your model. The package vignette [PHV Inputs](Make_PHV_Inputs.html) describes the default inputs and provides some guidance for creating these.
+
+### fSCA
+
+There are several sources of fSCA that can be used in the model. I used MODSCAG (Painter et al. 2009), which is better than MOD10A1.005 (Rittger et al. 2013). However, you will need to request access from the JPL Snow Team for MODSCAG. For CU Mountain Hydrology members, the historic archive of MODSCAG is located on snowserver and the package can automatically download the necessary files from snowserver (with some setup). 
+
+If you have locally downloaded fsca (from any source), these files can be used if they are in the right format and in the right location (see details below). 
+
+There is no processing performed on the fsca (e.g. cloud removal). It is up to the user to choose dates that have adequately clear skies. You could prescreen the dates at [NASA Worldview site](!https://worldview.earthdata.nasa.gov/). You can also simulate SWE for multiple dates and then select the SWE maps. Keep in mind that the package will automatically assume that the fsca of a pixel containing a SNOTEL station is 100% if the pixel is obscured and the SNOTEL station is reporting SWE > 0. 
+
 
 # Project setup
 
@@ -91,6 +116,22 @@ I have an r script to make the phv geotif files. There is [another vignette](Mak
 There should be a single column with a header called `dte` and the date format should be `YYYY-mm-dd`. You will provide the name of this file to run the model.
         
 
-# Run file
+# Run the model
 
 see an [example run file](https://github.com/hoargroup/example_sweRegression/blob/master/run_ucrb.R) on github. Here is a [plain text version](https://raw.githubusercontent.com/hoargroup/example_sweRegression/master/run_ucrb.R) you can copy as a template.
+
+# Model outputs
+
+There are 6 outputs. They are written to an `output` folder (and optionally within another subfolder, in my case `w_obscuredstations`) inside `data`.
+
+1. The SWE maps will be written as geotifs.  They are labeled phvfsca_<date>.tif and will have the same gridding as the input PHV variables. SWE is in meters.
+
+2. The SNOTEL observations for each model date are saved as geopackages. These can be loaded into any GIS system to view the SNOTEL values.
+
+3. The model coefficients are written to a separate file for each date. The files are called phvfsca_coefs_<yyyymmdd>.txt.
+
+4. The cross-validated MAE as a percent of observed SWE are written to a separate text file for each date called phvfsca_pctmae_<yyyymmdd>.txt. There is also a combined file called phvfsca_pctmae_combined.txt.
+
+5. The cross-validated r^2 are written to a separate text file for each date called phvfsca_r2_<yyyymmdd>.txt. There is also a combined file called phvfsca_r2_combined.txt.
+
+6. Graphics of the modeled SWE and fsca are plotted and saved to `swe_fsca_sidexside` inside `output/w_obscuredstations`. The files are labeled maps_<yyyymmdd>.png
