@@ -24,8 +24,20 @@ get_stationswe_data <- function(yr=2017,station_locs,network='snotel'){
 				suppressMessages({
 					csvdata <- readr::read_csv(file.path(PATH_SNOTEL,fname),
 																		 skip=3,
-																		 col_names=T,
+																		 col_names=T, #in case the order changes don't specify col names. replace by matching below and throw errror if col name is unexpected.
 																		 # col_types=c(i,D,c,d,d,d,d,d,d,d), #don't specify this because there are different # of columns in files
+																		 col_types = cols(  # use cols() to specify just some of the column types to save trouble later
+																		 	"Site Id" = col_character(),
+																		 	"Date" = col_date(format = '%Y-%m-%d'),
+																		 	"Time" = col_character(),
+																		 	"WTEQ.I-1 (in)" = col_double(),
+																		 	"PREC.I-1 (in)" = col_double(),
+																		 	"TOBS.I-1 (degC)" = col_double(),
+																		 	"TMAX.D-1 (degC)" = col_double(),
+																		 	"TMIN.D-1 (degC)" = col_double(),
+																		 	"TAVG.D-1 (degC)" = col_double(),
+																		 	"SNWD.I-1 (in)" = col_double()
+																		 ),
 																		 trim_ws=T)
 					# csvdata <- read.csv(file.path(PATH_SNOTEL, fname), skip = 3, #read_csv is better because it automatically adds X10, X11, etc to unnamed columns. read.csv gives blank column names which I found hard to work with
 					# header = T, check.names = F, stringsAsFactors = F)
@@ -58,17 +70,16 @@ get_stationswe_data <- function(yr=2017,station_locs,network='snotel'){
 				stop()
 			}
 			# print(head(x))
-			if(nrow(x)>0){
-				logi <- grepl('tme',names(x))
-				# print(logi)
-				# print(any(logi))
-				if(any(logi))		x <- x %>% dplyr::select(-tme) #since read_csv reads Time as a time column and we can't sepecify the column type as character, we should remove the column buecause dplyr can't convert a column of NA to proper times below.
-			}
-			return(x)# %>% dplyr::select(-time))
+			# if(nrow(x)>0){
+			# 	logi <- grepl('tme',names(x))
+			# 	# print(logi)
+			# 	# print(any(logi))
+			# 	if(any(logi))		x <- x %>% dplyr::select(-tme) #since read_csv reads Time as a time column and we can't sepecify the column type as character, we should remove the column buecause dplyr can't convert a column of NA to proper times below.
+			# }
+			return(x)
 		}
 		allfiles <- lapply(allfiles,fixdF)
-		dat = bind_rows(allfiles) %>%
-			mutate(Site_ID = as.character(Site_ID))
+		dat = bind_rows(allfiles)
 
 		dat2=full_join(station_locations,
 									 dat,by=c('Site_ID'))
