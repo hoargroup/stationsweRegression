@@ -8,3 +8,6 @@ The original purpose of this package was written to estimate SWE distribution us
 
 
 install with `devtools::install_github("hoargroup/stationsweRegression", build_vignettes = TRUE)`
+
+
+Please read the vignettes for details regarding use of the package. These can be read from this github repository or from R with `browseVignettes("stationsweRegression")`.
