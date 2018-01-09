@@ -31,8 +31,15 @@ get_modscag_data=function(doy=NULL,
 	}
 
 	if(type=='NRT'){
-		print('not available right now')
-		return()
+		PATH_DOY=paste0(PATH_MODSCAGDOWNLOAD,'/NRT/',yr,'/',doy)
+		dir.create(PATH_DOY, showWarnings = FALSE, rec=TRUE)
+		tiffiles=dir(PATH_DOY,'*snow_fraction.tif$',full.names = TRUE)
+		if(length(tiffiles)==0){
+			print('These NRT files do not exist on your computer. please download them from snow-dav using get_NRTmodscag.sh or otherwise (get_NRTmodscag.sh does not exist as part of this package because it uses password protected login for downloads).')
+			return(raster())
+		}
+		simfsca=gdalUtils::gdalwarp(tiffiles,simfscafilename,output_Raster = TRUE,t_srs = '+proj=longlat +datum=WGS84',te = c(xmin,ymin,xmax,ymax),tr=c(reso,reso),r='near',dstnodata='-99',ot='Int32')#make sure this is cast at least as a signed integer for -99
+
 	}
 
 	if(type=='historic'){
@@ -41,6 +48,7 @@ get_modscag_data=function(doy=NULL,
 		PATH_DOY=paste0(PATH_MODSCAGDOWNLOAD,'/',yr,'/',doy)
 		dir.create(PATH_DOY, showWarnings = FALSE, rec=TRUE)
 		tiffiles=dir(PATH_DOY,'*snow_fraction.tif$',full.names = TRUE)
+
 		if(length(tiffiles)==0) {
 			print('no files found for this date. downloading from snowserver.')
 			system(paste0('scp -i ~/.ssh/snowserver_rsa snowserver.colorado.edu:/data/hydroData/WestUS_Data/MODSCAG/modscag-historic/',yr,'/',doy,'/*fraction.tif ', PATH_DOY,'/'))
@@ -53,6 +61,7 @@ get_modscag_data=function(doy=NULL,
 		simfsca=gdalUtils::gdalwarp(tiffiles,simfscafilename,output_Raster = TRUE,t_srs = '+proj=longlat +datum=WGS84',te = c(xmin,ymin,xmax,ymax),tr=c(reso,reso),r='near',dstnodata='-99',ot='Int32')#make sure this is cast at least as a signed integer for -99
 
 	}
+	return(simfsca)
 
 }
 
