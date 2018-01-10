@@ -9,6 +9,9 @@ get_rcn_nc(ryr)
 \arguments{
 \item{ryr}{the year of reconstruction}
 }
+\value{
+rasterstack of reconstructed swe for the 1st and 15th of each year present in recondata*.nc files
+}
 \description{
 function to extract the 1st and 15th of each month from a single year of reconstruction
 }

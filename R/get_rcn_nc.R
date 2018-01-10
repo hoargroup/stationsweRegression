@@ -2,7 +2,7 @@
 #'
 #' @param ryr the year of reconstruction
 #' @details It's assumed that the .nc file has dimensions Lat, Long, time. The variable is "swe" in meters. Values of the time dimension are stored YYYYMMDD.
-#'
+#' @return rasterstack of reconstructed swe for the 1st and 15th of each year present in recondata*.nc files
 #'
 
 get_rcn_nc <- function(ryr){

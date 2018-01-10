@@ -4,15 +4,18 @@
 #' @param snoteltoday.sp spatialpoints data frame of the snotel data for the simulation date
 #' @param snoteltoday regular dataframe  of the snotel data for the simulation date
 #' @param phvsnotel dataframe containing the physiographic values for the pixels that contain snotel stations
-#' @param myformula formula for regression
 #' @param simfsca raster. modscag image of fsca for the simulation date
-#' @param snow_var character string identifying the snow related regression variable
-#' @param PATH_RCNDOWNLOAD path for the location of recondata*.nc files used with snow_var is 'rcn'
+#' @param SNOW_VAR character string identifying the snow related regression variable. this should have been setup in the runfile
+#' @param PHV_VARS formula with the independent physiographic variables for the regression
+#' @param PATH_RCNDOWNLOAD path for the location of recondata*.nc files used with SNOW_VAR is 'rcn'
+#' @return a list with 3 items. 1. dataframe with all variables needed to fit the regression model 2. dataframe with all variables  needed to predict on the same grid as the fsca image 3. a formula for predicting
 
 
-setup_modeldata <- function(snoteltoday.sp,snoteltoday,phvsnotel,myformula,simfsca,snow_var,PATH_RCNDOWNLOAD){
+setup_modeldata <- function(snoteltoday.sp,snoteltoday,phvsnotel,simfsca,SNOW_VAR,PHV_VARS,PATH_RCNDOWNLOAD){
 
-	if(snow_var=='rcn'){
+	myformula <- as.formula(paste0('snotel ~ ',paste(as.character(PHV_VARS)[2],SNOW_VAR,sep=' + ')))
+
+	if(SNOW_VAR=='rcn'){
 		rcn_nc_files=dir(PATH_RCNDOWNLOAD,glob2rx('^recondata*.nc$'))
 		if(length(rcn_nc_files)==0){
 			print('you haven\'t provided recondata files in the path specified by PATH_RCNDOWNLOAD (this should be defined at the top of your run files).')
@@ -21,7 +24,7 @@ setup_modeldata <- function(snoteltoday.sp,snoteltoday,phvsnotel,myformula,simfs
 		ryrs=as.numeric(sapply(strsplit(rcn_nc_files,split='[_.]'),FUN='[',2))
 		snow_raster=stack(map(ryrs,get_rcn_nc))
 
-	} else if(snow_var=='fsca') {
+	} else if(SNOW_VAR=='fsca') {
 
 		snow_raster=simfsca
 
@@ -54,16 +57,15 @@ setup_modeldata <- function(snoteltoday.sp,snoteltoday,phvsnotel,myformula,simfs
 		mutate(fsca=ifelse(fsca>100 & snotel>0,100,fsca)) %>% #if the station is obscured but snotel>0 then 100% coverage
 		mutate(fsca=ifelse(fsca==0 & snotel>0,15,fsca)) %>% #if pixel shows no snow but snotel>0, then 15% coverage (modscag detection limit)
 		filter(fsca<=100) %>% #remove stations where pixel is obscured and snotel isn't recording snow>0
-		mutate(swe=snotel)#*fsca/100)
 
 	# setup prediction dataframe and add rcn variable to doidata if applicable
 
-	if(snow_var=='fsca'){
+	if(SNOW_VAR=='fsca'){
 
 		## combine fsca with phv data for the domain for subsequent prediction ----
 		predictdF <- bind_cols(ucophv,as.data.frame(simfsca) %>% setNames(fsca)) %>% tbl_df
 
-	} else if(snow_var=='rcn'){
+	} else if(SNOW_VAR=='rcn'){
 
 		snotel_rcn <-
 			raster::extract(snow_raster,snoteltoday.sp,sp=T) %>%
@@ -72,9 +74,11 @@ setup_modeldata <- function(snoteltoday.sp,snoteltoday,phvsnotel,myformula,simfs
 			dplyr::select(-Longitude, -Latitude) %>%
 			mutate_if(is.factor,as.character) %>%
 			gather(rdate,rcn,-Station_ID:-dy)
-		# setNames(c(names(snoteltoday.sp),snow_var)) %>%
+		# setNames(c(names(snoteltoday.sp),SNOW_VAR)) %>%
 
-		selectrcn_data <- doidata %>% left_join(snotel_rcn)
+		selectrcn_data <- doidata %>%
+			mutate(snotel=snotel*fsca/100) %>% #in the paper we showed that scaling the snotel reading by fsca of the pixel improves the regression estimates. but it is statistically invalid for phvfsca estimate
+			left_join(snotel_rcn)
 
 		extract_cvm <- function(cvglmnet_object){
 			cvglmnet_object$cvm[which(cvglmnet_object$lambda==cvglmnet_object$lambda.1se)]
@@ -98,9 +102,9 @@ setup_modeldata <- function(snoteltoday.sp,snoteltoday,phvsnotel,myformula,simfs
 
 		## combine rcn with phv data for the domain for subsequent prediction ----
 		rcn_raster <- snow_raster[[grep(bestrdate,names(snow_raster))]]
-		predictdF <- bind_cols(ucophv,as.data.frame(rcn_raster) %>% setNames('rcn')) %>% tbl_df
+		predictdF <- bind_cols(ucophv,raster::as.data.frame(rcn_raster) %>% setNames('rcn')) %>% tbl_df
 
 	}
 
-	return(list(doidata,predictdF))
+	return(list(doidata,predictdF,myformula))
 }

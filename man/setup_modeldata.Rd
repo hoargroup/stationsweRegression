@@ -4,8 +4,8 @@
 \alias{setup_modeldata}
 \title{setup modeldata based on fsca or rcn as predictor}
 \usage{
-setup_modeldata(snoteltoday.sp, snoteltoday, phvsnotel, myformula, simfsca,
-  snow_var, PATH_RCNDOWNLOAD)
+setup_modeldata(snoteltoday.sp, snoteltoday, phvsnotel, simfsca, SNOW_VAR,
+  PHV_VARS, PATH_RCNDOWNLOAD)
 }
 \arguments{
 \item{snoteltoday.sp}{spatialpoints data frame of the snotel data for the simulation date}
@@ -14,13 +14,16 @@ setup_modeldata(snoteltoday.sp, snoteltoday, phvsnotel, myformula, simfsca,
 
 \item{phvsnotel}{dataframe containing the physiographic values for the pixels that contain snotel stations}
 
-\item{myformula}{formula for regression}
-
 \item{simfsca}{raster. modscag image of fsca for the simulation date}
 
-\item{snow_var}{character string identifying the snow related regression variable}
+\item{SNOW_VAR}{character string identifying the snow related regression variable. this should have been setup in the runfile}
 
-\item{PATH_RCNDOWNLOAD}{path for the location of recondata*.nc files used with snow_var is 'rcn'}
+\item{PHV_VARS}{formula with the independent physiographic variables for the regression}
+
+\item{PATH_RCNDOWNLOAD}{path for the location of recondata*.nc files used with SNOW_VAR is 'rcn'}
+}
+\value{
+a list with 3 items. 1. dataframe with all variables needed to fit the regression model 2. dataframe with all variables  needed to predict on the same grid as the fsca image 3. a formula for predicting
 }
 \description{
 setup modeldata based on fsca or rcn as predictor
