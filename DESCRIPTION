@@ -7,21 +7,19 @@ Description: This package implements a SWE regression algorithm that uses observ
 Depends:
     R (>= 3.3.1)
 Suggests:
-    gdalUtils 
-    rgdal
-    sp
-    raster 
-    RSAGA
+    gdalUtils, 
+    rgdal, 
+    sp, 
+    raster,  
+    RSAGA, 
 Imports:
-    tidyverse,
-    glmnetUtils,
-    modelr,
-    cowplot,
-    viridis
+    tidyverse, 
+    glmnetUtils, 
+    modelr, 
+    cowplot, 
+    viridis, 
 License: MIT
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 6.0.1
-Suggests: knitr,
-    rmarkdown
 VignetteBuilder: knitr

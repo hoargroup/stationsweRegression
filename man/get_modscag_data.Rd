@@ -2,8 +2,7 @@
 % Please edit documentation in R/get_modscag_data.R
 \name{get_modscag_data}
 \alias{get_modscag_data}
-\title{Function to get MODSCAG data
-Either download the near realtime data from snowdav system or use archived historic data}
+\title{Function to get MODSCAG data.}
 \usage{
 get_modscag_data(doy = NULL, yr = NULL, type = NULL, imagepath = NULL,
   reso, xmin, xmax, ymin, ymax)
@@ -28,8 +27,7 @@ get_modscag_data(doy = NULL, yr = NULL, type = NULL, imagepath = NULL,
 \item{ymax}{maximum y coordinate of domain}
 }
 \description{
-Function to get MODSCAG data
-Either download the near realtime data from snowdav system or use archived historic data
+The function will check for existing processed fsca images in the imagepath. If it doesn't exist, it will check for raw, unprocessed files and mosaic them. If no file exist it will attempt to download them from snowserver and mosaic them.
 }
 \details{
 called for its side effect of producing a mosaicked fsca image of the domain
