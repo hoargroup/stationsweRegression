@@ -18,20 +18,18 @@ setup_modeldata <- function(snoteltoday.sp,snoteltoday,phvsnotel,simfsca,SNOW_VA
 	if(SNOW_VAR=='rcn'){
 		rcn_nc_files=dir(PATH_RCNDOWNLOAD,glob2rx('^recondata*.nc$'))
 		if(length(rcn_nc_files)==0){
-			print('you haven\'t provided recondata files in the path specified by PATH_RCNDOWNLOAD (this should be defined at the top of your run files).')
-			stop()
+			stop('you haven\'t provided recondata files in the path specified by PATH_RCNDOWNLOAD (this should be defined at the top of your run files).')
 		}
 		ryrs=as.numeric(sapply(strsplit(rcn_nc_files,split='[_.]'),FUN='[',2))
 		snow_raster=stack(map(ryrs,get_rcn_nc))
 
 	} else if(SNOW_VAR=='fsca') {
 
-		snow_raster=simfsca
+		snowpred_raster=simfsca
 
 	} else {
 
-		print('you haven\'t selected rcn or fsca as a predictor')
-		stop()
+		stop('you haven\'t selected rcn or fsca as a predictor')
 
 		}
 
@@ -56,16 +54,11 @@ setup_modeldata <- function(snoteltoday.sp,snoteltoday,phvsnotel,simfsca,SNOW_VA
 		inner_join(snotel_fsca) %>%
 		mutate(fsca=ifelse(fsca>100 & snotel>0,100,fsca)) %>% #if the station is obscured but snotel>0 then 100% coverage
 		mutate(fsca=ifelse(fsca==0 & snotel>0,15,fsca)) %>% #if pixel shows no snow but snotel>0, then 15% coverage (modscag detection limit)
-		filter(fsca<=100) %>% #remove stations where pixel is obscured and snotel isn't recording snow>0
+		filter(fsca<=100) #remove stations where pixel is obscured and snotel isn't recording snow>0
 
 	# setup prediction dataframe and add rcn variable to doidata if applicable
 
-	if(SNOW_VAR=='fsca'){
-
-		## combine fsca with phv data for the domain for subsequent prediction ----
-		predictdF <- bind_cols(ucophv,as.data.frame(simfsca) %>% setNames(fsca)) %>% tbl_df
-
-	} else if(SNOW_VAR=='rcn'){
+	if(SNOW_VAR=='rcn'){
 
 		snotel_rcn <-
 			raster::extract(snow_raster,snoteltoday.sp,sp=T) %>%
@@ -98,13 +91,16 @@ setup_modeldata <- function(snoteltoday.sp,snoteltoday,phvsnotel,simfsca,SNOW_VA
 			summarize(best_rdate=rdate[which.min(cvm)]) %>%
 			as.character()
 
+		## add only best recon data for model fitting data
 		doidata <- left_join(doidata,snotel_rcn %>% filter(rdate == bestrdate))
 
-		## combine rcn with phv data for the domain for subsequent prediction ----
-		rcn_raster <- snow_raster[[grep(bestrdate,names(snow_raster))]]
-		predictdF <- bind_cols(ucophv,raster::as.data.frame(rcn_raster) %>% setNames('rcn')) %>% tbl_df
+		## get best recon raster
+		snowpred_raster <- snow_raster[[grep(bestrdate,names(snow_raster))]]
 
 	}
+
+	## combine snow variable with phv data for the domain for subsequent prediction ----
+	predictdF <- bind_cols(ucophv,raster::as.data.frame(snowpred_raster) %>% setNames(SNOW_VAR)) %>% tbl_df
 
 	return(list(doidata,predictdF,myformula))
 }

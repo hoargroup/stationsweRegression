@@ -66,8 +66,7 @@ get_stationswe_data <- function(yr=2017,station_locs,network='snotel'){
 				snotelid = unique(x$Site_ID)
 				fileyr = unique(strftime(x$dte,'%Y'))
 				snotelfn = paste0(snotelid,'-',fileyr,'CY.csv')
-				print(paste0('You have an unexpected column name in SNOTEL file: ',snotelfn,'. You should investigate.'))
-				stop()
+				stop(paste0('You have an unexpected column name in SNOTEL file: ',snotelfn,'. You should investigate.'))
 			}
 			# print(head(x))
 			# if(nrow(x)>0){
