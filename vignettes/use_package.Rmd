@@ -13,11 +13,7 @@ vignette: >
 
 This document will describe how to set up an R script to run the commands needed to estimate SWE distribution following the methods described in [Schneider and Molotch, 2016](!http://onlinelibrary.wiley.com/doi/10.1002/2016WR019067/full).
 
-Keep in mind that the package was first developed to estimate SWE distribution in the northern Rockies using a step-wise linear regression between SNOTEL observations (dependent variable), and reconstructed SWE and static topographic variables (independent variables). There are two main modifications you should be aware of:
-
-- fsca is used as a predictor instead of reconstructed SWE. If you look in the discussion of the paper, we show that this is almost as good as using reconstructed SWE. I've done some more tests and found that the accuracy trade off versus not having to run the reconstruction model for new domains is worthwhile for my immediate purposes.
-
-- the statistical model from the paper was upgraded from a step-wise linear regression to an elastic-net linear regression. in short, this means that all the predictor variables get used rather than dropping the variables with the lowest predictive ability.
+Keep in mind that the package was first developed to estimate SWE distribution in the northern Rockies using a step-wise linear regression between SNOTEL observations (dependent variable), and reconstructed SWE and static topographic variables (independent variables). The only difference is that the statistical model from the paper was upgraded from a step-wise linear regression to an elastic-net linear regression. in short, this means that all the predictor variables get used rather than dropping the variables with the lowest predictive ability.
 
 I've tried to make the package so it can be extended to use e.g. MOD10A1 fsca and CADWR station observations with the appropriate changes.
 
@@ -40,12 +36,16 @@ If you have locally downloaded fsca (from any source), these files can be used i
 
 There is no processing performed on the fsca (e.g. cloud removal). It is up to the user to choose dates that have adequately clear skies. You could prescreen the dates at [NASA Worldview site](!https://worldview.earthdata.nasa.gov/). You can also simulate SWE for multiple dates and then select the SWE maps. Keep in mind that the package will automatically assume that the fsca of a pixel containing a SNOTEL station is 100% if the pixel is obscured and the SNOTEL station is reporting SWE > 0. 
 
+### Reconstructed SWE 
+
+Reconstructed SWE (often abbreviated "rcn") from the past can be used to improve real-time SWE estimates. In theory any **independently-derived** spatial SWE map could be used. The regression model will cycle through an ensemble of past spatial SWE estimates and use k-fold cross validation to pick the best past spatial pattern for estimating the current distribution of SWE at the snow pillows. This is a brute-force method and disregrads issues of scale between the reconstructed pixel and the snow pillow.
 
 # Project setup
 
 You should create a working directory from which to run the functions in this package. It should contain
 
 * a directory named `modscag_downloads`
+* a directory named `rcn_<location>`  (only required if estimating with reconstructed swe)
 * domain directory, e.g. idwy, that will contain information specific to the domain
 * a csv file of the dates you are interested in. This can have any filename, and you will provide the exact name and location later
 
@@ -83,6 +83,12 @@ The package will download them for you after checking to make sure the files don
 	+ or, recreate the ssh key with a passphrase (rather than not having one)
 	
 *NB: make sure your username is the same on your local machine and snowserver. otherwise you will need to replace `snowserver.colorado.edu` with `<sslogin>@snowserver.colorado.edu`
+
+## rcn_<location>
+
+The directory name should reflect the model domain name of the reconstruction. This is not necessarily the same domain as the regression (the regression domain must be contained within the reconstruction domain, i.e. the regression domain can be smaller). The directory should contain 1 netcdf file per reconstructed year. Each netcdf filename should begin with "recondata" have the extension ".nc". It should consist of 1 variable "swe" (meters) and 3 dimensions: longitude, latitude, and time where time is day in format YYYYMMDD.
+
+If the reconstruction grid is different from the regression grid then the reconstruction will need to be resampled/cropped to be the same as the fsca and phv variables.
 
 
 ## domain directory
