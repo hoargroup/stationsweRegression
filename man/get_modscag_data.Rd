@@ -26,6 +26,9 @@ get_modscag_data(doy = NULL, yr = NULL, type = NULL, imagepath = NULL,
 
 \item{ymax}{maximum y coordinate of domain}
 }
+\value{
+rasterImage of fsca for the simulation date
+}
 \description{
 The function will check for existing processed fsca images in the imagepath. If it doesn't exist, it will check for raw, unprocessed files and mosaic them. If no file exist it will attempt to download them from snowserver and mosaic them.
 }
