@@ -113,6 +113,7 @@ The resulting folder structure is therefore:
 			* snoteldownloads -> (auto created) the model will download the relevant snotel data here
 			* fsca -> (auto created) the processed modscag files will be written here
 			* output -> (auto created) the SWE distribution results will be written here
+	* rcn_<location> (user created, optional depending on whether rcn is used as a predictor)
 		
 I have an r script to make the phv geotif files. There is [another vignette](Make_PHV_Inputs.html) with this information.
 
