@@ -8,12 +8,14 @@
 
 get_stationswe_data <- function(yr=2017,station_locs,network='snotel'){
 	if(network=='snotel'){
-		nwcc_download_script=system.file('sh','gethistoric.sh',package='stationsweRegression')
 		site_id=379
 		for(site_id in station_locs$Site_ID){
 			station_yr_file=file.path(getwd(),paste0(PATH_SNOTEL,'/',site_id,'-',yr,'CY.csv'))
 			if(!file.exists(station_yr_file)){
-				system2('source',paste(nwcc_download_script, site_id, 'STAND Daily', yr, 'CY'),stdout=file.path(getwd(),paste0(PATH_SNOTEL,'/',site_id,'-',yr,'CY.csv')))
+				URL ="https://wcc.sc.egov.usda.gov/nwcc/view?intervalType=Historic+&report=STAND&timeseries=Daily&format=copy&sitenum="
+				URL = paste0(URL,site_id,'&year=')
+				URL = paste0(URL,yr,'&month=CY')
+				download.file(URL,station_yr_file,method="auto")
 			}
 		}
 		fns = list.files(path = PATH_SNOTEL, pattern = paste0(yr,"CY.csv"))
