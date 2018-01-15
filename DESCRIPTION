@@ -1,6 +1,6 @@
 Package: stationsweRegression
 Title: SWE Distribution for Station Observations
-Version: 0.2
+Version: 0.2.1
 Authors@R: person("Dominik", "Schneider", email = "dominik.schneider@colorado.edu", role = c("aut", "cre"))
 Description: This package implements a SWE regression algorithm that uses observations from SNOTEL stations, remotely sensed SWE
     (or fSCA), and physiographic variables. See algorithm development details in Schneider and Molotch, 2016, Water Resources Research
