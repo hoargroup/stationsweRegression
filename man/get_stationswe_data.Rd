@@ -4,11 +4,9 @@
 \alias{get_stationswe_data}
 \title{download and combine station data}
 \usage{
-get_stationswe_data(yr = 2017, station_locs, network = "snotel")
+get_stationswe_data(station_locs, network)
 }
 \arguments{
-\item{yr}{yr of the simulation date}
-
 \item{station_locs}{tbl_df of site metadata}
 
 \item{network}{default snotel}

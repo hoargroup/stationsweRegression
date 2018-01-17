@@ -4,13 +4,11 @@
 \alias{setup_modeldata}
 \title{setup modeldata based on fsca or rcn as predictor}
 \usage{
-setup_modeldata(snoteltoday.sp, snoteltoday, phvsnotel, simfsca, SNOW_VAR,
-  PHV_VARS, PATH_RCNDOWNLOAD)
+setup_modeldata(snoteltoday.sp, phvsnotel, simfsca, SNOW_VAR, PHV_VARS,
+  PATH_RCNDOWNLOAD)
 }
 \arguments{
 \item{snoteltoday.sp}{spatialpoints data frame of the snotel data for the simulation date}
-
-\item{snoteltoday}{regular dataframe  of the snotel data for the simulation date}
 
 \item{phvsnotel}{dataframe containing the physiographic values for the pixels that contain snotel stations}
 
