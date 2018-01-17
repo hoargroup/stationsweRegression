@@ -2,7 +2,6 @@
 #'
 #' @export
 #' @param snoteltoday.sp spatialpoints data frame of the snotel data for the simulation date
-#' @param snoteltoday regular dataframe  of the snotel data for the simulation date
 #' @param phvsnotel dataframe containing the physiographic values for the pixels that contain snotel stations
 #' @param simfsca raster. modscag image of fsca for the simulation date
 #' @param SNOW_VAR character string identifying the snow related regression variable. this should have been setup in the runfile
@@ -11,7 +10,12 @@
 #' @return a list with 3 items. 1. dataframe with all variables needed to fit the regression model 2. dataframe with all variables  needed to predict on the same grid as the fsca image 3. a formula for predicting
 
 
-setup_modeldata <- function(snoteltoday.sp,snoteltoday,phvsnotel,simfsca,SNOW_VAR,PHV_VARS,PATH_RCNDOWNLOAD){
+setup_modeldata <- function(snoteltoday.sp,phvsnotel,simfsca,SNOW_VAR,PHV_VARS,PATH_RCNDOWNLOAD){
+	if(nargs()<6) {
+		stop('not enough arguments to setup_modeldata()')
+	} else if(nargs()>6){
+		stop('too many arguments to setup_modeldata()')
+	}
 
 	myformula <- as.formula(paste0('snotel ~ ',paste(as.character(PHV_VARS)[2],SNOW_VAR,sep=' + ')))
 
@@ -45,13 +49,10 @@ setup_modeldata <- function(snoteltoday.sp,snoteltoday,phvsnotel,simfsca,SNOW_VA
 		setNames(newnames) %>%
 		mutate_if(is.factor,as.character)
 
-	## join station fsca and swe data with station data ---
-	swedata=inner_join(snotel_fsca,phvsnotel,by=c('Station_ID','Site_ID'))
-
-	## merge today's snotel data and phv data ----
+	## join station fsca and swe data with station phv data ----
+	## take care of some inconsistencies between fsca and pillow
 	doidata <-
-		inner_join(snoteltoday,phvsnotel,by=c('Station_ID','Site_ID')) %>%
-		inner_join(snotel_fsca) %>%
+		inner_join(snotel_fsca,phvsnotel,by=c('Site_ID')) %>%
 		mutate(fsca=ifelse(fsca>100 & snotel>0,100,fsca)) %>% #if the station is obscured but snotel>0 then 100% coverage
 		mutate(fsca=ifelse(fsca==0 & snotel>0,15,fsca)) %>% #if pixel shows no snow but snotel>0, then 15% coverage (modscag detection limit)
 		filter(fsca<=100) #remove stations where pixel is obscured and snotel isn't recording snow>0
@@ -64,16 +65,20 @@ setup_modeldata <- function(snoteltoday.sp,snoteltoday,phvsnotel,simfsca,SNOW_VA
 			raster::extract(snow_raster,snoteltoday.sp,sp=T) %>%
 			as.data.frame() %>%
 			tbl_df %>%
-			dplyr::select(-Longitude, -Latitude) %>%
+			dplyr::select(-Longitude, -Latitude, -snotel) %>% #remove snotel so we don't run into troubel when we join below and scale the snotel value
 			mutate_if(is.factor,as.character) %>%
-			gather(rdate,rcn,-Station_ID:-dy)
+			gather(rdate,rcn,-Site_ID:-dy)
 		# setNames(c(names(snoteltoday.sp),SNOW_VAR)) %>%
 
 		selectrcn_data <- doidata %>%
 			mutate(snotel=snotel*fsca/100) %>% #in the paper we showed that scaling the snotel reading by fsca of the pixel improves the regression estimates. but it is statistically invalid for phvfsca estimate
 			left_join(snotel_rcn)
 
-		extract_cvm <- function(cvglmnet_object){
+
+		print('selecting the best recon date...')
+
+		extract_cvm <- function(data,myformula){
+			cvglmnet_object <- gnet_phvfsca(data,myformula)
 			cvglmnet_object$cvm[which(cvglmnet_object$lambda==cvglmnet_object$lambda.1se)]
 		}
 
@@ -82,8 +87,17 @@ setup_modeldata <- function(snoteltoday.sp,snoteltoday,phvsnotel,simfsca,SNOW_VA
 			# filter(rdate=='X20000301' | rdate=='X20010301') %>%
 			group_by(rdate) %>%
 			nest() %>%
-			mutate(cv_obj=map(data,gnet_phvfsca,myformula),
-						 cvm=map_dbl(cv_obj,extract_cvm))
+			mutate(
+				cvm=map_dbl(data,extract_cvm,myformula))
+
+
+		# selectrcn_cvm <-
+		# 	selectrcn_data %>%
+		# 	# filter(rdate=='X20000301' | rdate=='X20010301') %>%
+		# 	group_by(rdate) %>%
+		# 	nest() %>%
+		# 	mutate(cv_obj=map(data,gnet_phvfsca,myformula),
+		# 				 cvm=map_dbl(cv_obj,extract_cvm))
 
 		bestrdate <-
 			selectrcn_cvm %>%

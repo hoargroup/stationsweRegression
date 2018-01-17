@@ -6,7 +6,11 @@
 #' @details There is a snotel inventory included with the package from Jan 2017. It can be updated from https://wcc.sc.egov.usda.gov/nwcc/inventory or theoretically replaced with that of a different network
 
 get_inv <- function(network='snotel'){
+ if(network=='cdec'){
 
+ 	pillowlocs.df=read_csv(system.file("extdata","cdec_swe_inventory.csv",package='stationsweRegression'))
+
+ }
 	if(network=='snotel'){
 		nwccinv=read_csv(system.file("extdata","nwcc_snotel_inventory.csv",package='stationsweRegression'))
 		nwccinv <- nwccinv %>%
@@ -19,7 +23,7 @@ get_inv <- function(network='snotel'){
 
 		snotellocs=inner_join(snotellocs,nwccinv,by=c("Site_ID" = "stationid"))
 
-		snotellocs.df=snotellocs %>%
+		pillowlocs.df=snotellocs %>%
 			dplyr::select(Station_ID,Site_ID,site_name,State,Latitude,Longitude,Elevation_m,start_date,end_date) %>%
 			mutate(
 				site_name=as.character(site_name),
@@ -29,6 +33,6 @@ get_inv <- function(network='snotel'){
 				Station_ID=gsub(' ','',Station_ID))
 	}
 
-	return(snotellocs.df)
+	return(pillowlocs.df)
 }
 

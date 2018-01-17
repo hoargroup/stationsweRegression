@@ -1,12 +1,12 @@
 #' download and combine station data
 #'
-#' @param yr yr of the simulation date
 #' @param station_locs tbl_df of site metadata
 #' @param network default snotel
 #' @export
 #' @return tibble with station data from nrcs
 
-get_stationswe_data <- function(yr=2017,station_locs,network='snotel'){
+get_stationswe_data <- function(station_locs,network){
+
 	if(network=='snotel'){
 		site_id=379
 		for(site_id in station_locs$Site_ID){
@@ -82,19 +82,87 @@ get_stationswe_data <- function(yr=2017,station_locs,network='snotel'){
 		allfiles <- lapply(allfiles,fixdF)
 		dat = bind_rows(allfiles)
 
-		dat2=full_join(station_locations,
+		dat2=full_join(station_locs,
 									 dat,by=c('Site_ID'))
 		# str(dat2)
 		snoteldata=dat2 %>%
 			# filter(time=='') %>%
-			dplyr::select(Station_ID, Site_ID, Longitude, Latitude, dte, swe, snwd) %>%
+			dplyr::select(Site_ID, Longitude, Latitude, dte, swe, snwd) %>%
 			mutate(
 				dte=as.Date(dte),
 				snotel=replace(swe,swe<0,  NA),
 				snotel=snotel*2.54/100,#convert inches to meters
 				snwd=replace(snwd,snwd<0,  NA),
 				snwd=snwd*2.54/100)
+
+		return(snoteldata)
 	}
 
-	return(snoteldata)
+
+	if(network=='cdec'){
+		# datestr='20180115'
+		site_id='DAN'
+		for(site_id in station_locs$Site_ID){
+			new_file=file.path(getwd(),PATH_SNOTEL,paste0('cdec_',site_id,'_',datestr,'.csv'))
+			# new_file=file.path('~/CUDrive/example_sweRegression',paste0(site_id,'_',datestr,'.csv'))
+			old_files=dir(path=file.path(getwd(),PATH_SNOTEL),glob2rx(paste0('cdec_',site_id,'*.csv')),full.names=T)
+			# print(basename(old_files))
+			# old_files=dir(path='~/CUDrive/example_sweRegression',pattern=glob2rx(paste0('^',site_id,'*.csv$')),full.names=T)
+			if(length(old_files)>0){
+				existingDates <- as.Date(sapply(strsplit(x=basename(old_files),split='[._]',fixed=F),'[',3),'%Y%m%d')
+				oldestDateind <- which.max(existingDates)
+				oldestDate <- existingDates[oldestDateind]
+			} else {
+				oldestDate <- NA
+			}
+			newDate <- as.Date(datestr,format='%Y%m%d')
+
+			if(!isTRUE(oldestDate >= newDate )){
+				downloadURL=paste0('http://cdec.water.ca.gov/cgi-progs/queryCSV?station_id=',site_id,'&dur_code=D&sensor_num=82&start_date=1/1/1900&end_date=',strftime(newDate,'%m/%d/%Y'))
+				dstatus <- download.file(downloadURL,new_file,method="auto")
+			}
+			if(length(old_files)>0){
+				file.remove(old_files[-oldestDateind])
+			}
+
+		}
+		fns = list.files(path = PATH_SNOTEL, pattern = glob2rx(paste0('cdec*.csv')),full.names=T)
+		# fname=fns[1]
+		# print(fname)
+
+		importCDEC <- function(fn){
+			tryCatch({
+				read_csv(fn,skip=2, quote="\'",
+								 na='m',
+								 col_types = list(
+								 	col_date(format='%Y%m%d'),
+								 	col_time(format='%H%M'),
+								 	col_number()
+								 ),
+								 col_names = c('dte','time','swe')
+				)}, error = function(e){
+					data_frame()
+				})
+		}
+
+		siteIDs <- sapply(strsplit(basename(fns),'[._]',fixed=F),'[',2)
+		dat <- map_df(fns,importCDEC,.id='Site_ID') %>%
+			mutate(Site_ID=siteIDs[as.numeric(Site_ID)])
+
+		print('done reading files')
+
+		dat2=full_join(station_locs,
+									 dat,by=c('Site_ID'))
+
+		cdecdata=dat2 %>%
+			# filter(time=='') %>%
+			dplyr::select(Site_ID, Longitude, Latitude, dte, swe) %>%
+			mutate(
+				dte=as.Date(dte),
+				snotel=replace(swe,swe<0,  NA),
+				snotel=snotel*2.54/100)#convert inches to meters
+
+		return(cdecdata)
+	}
+
 }
