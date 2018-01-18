@@ -41,9 +41,10 @@ get_modscag_data=function(doy=NULL,
 	}
 
 	if(type=='NRT'){
-		PATH_DOY=paste0(PATH_MODSCAGDOWNLOAD,'/NRT/',yr,'/',doy)
+		PATH_DOY=paste0(PATH_MODSCAGDOWNLOAD,'/',yr,'/',doy)
 		dir.create(PATH_DOY, showWarnings = FALSE, rec=TRUE)
-		tiffiles=dir(PATH_DOY,'*snow_fraction.tif$',full.names = TRUE)
+		tiffiles=dir(PATH_DOY,'*NRT.snow_fraction.tif$',full.names = TRUE)
+
 		if(length(tiffiles)==0){
 			stop('The NRT fsca files do not exist on your computer. please download them from snow-dav using get_NRTmodscag.sh or otherwise (get_NRTmodscag.sh does not exist as part of this package because it uses password protected login for downloads).')
 		}
@@ -55,6 +56,7 @@ get_modscag_data=function(doy=NULL,
 		PATH_DOY=paste0(PATH_MODSCAGDOWNLOAD,'/',yr,'/',doy)
 		dir.create(PATH_DOY, showWarnings = FALSE, rec=TRUE)
 		tiffiles=dir(PATH_DOY,'*snow_fraction.tif$',full.names = TRUE)
+		tiffiles=tiffiles[!grepl("NRT.snow_fraction.tif", tiffiles)]
 
 		if(length(tiffiles)==0) {
 			print('no files found for this date. downloading from snowserver.')
