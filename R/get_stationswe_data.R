@@ -8,6 +8,11 @@
 get_stationswe_data <- function(station_locs,network){
 
 	if(network=='snotel'){
+
+		station_locs <- station_locs %>%
+			filter(start_date<simdate) %>%
+			filter(end_date>simdate)
+
 		site_id=379
 		for(site_id in station_locs$Site_ID){
 			station_yr_file=file.path(getwd(),paste0(PATH_SNOTEL,'/',site_id,'-',yr,'CY.csv'))
@@ -87,13 +92,11 @@ get_stationswe_data <- function(station_locs,network){
 		# str(dat2)
 		snoteldata=dat2 %>%
 			# filter(time=='') %>%
-			dplyr::select(Site_ID, Longitude, Latitude, dte, swe, snwd) %>%
+			dplyr::select(Site_ID, Longitude, Latitude, dte, swe) %>%
 			mutate(
 				dte=as.Date(dte),
 				snotel=replace(swe,swe<0,  NA),
-				snotel=snotel*2.54/100,#convert inches to meters
-				snwd=replace(snwd,snwd<0,  NA),
-				snwd=snwd*2.54/100)
+				snotel=snotel*2.54/100)#convert inches to meters
 
 		return(snoteldata)
 	}
