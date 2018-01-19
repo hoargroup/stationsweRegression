@@ -86,7 +86,7 @@ The package will download them for you after checking to make sure the files don
 
 ## rcn_<location>
 
-The directory name should reflect the model domain name of the reconstruction. This is not necessarily the same domain as the regression (the regression domain must be contained within the reconstruction domain, i.e. the regression domain can be smaller). The directory should contain 1 netcdf file per reconstructed year. Each netcdf filename should begin with "recondata" have the extension ".nc". It should consist of 1 variable "swe" (meters) and 3 dimensions: longitude, latitude, and time where time is day in format YYYYMMDD.
+The directory name should reflect the model domain name of the reconstruction. This is not necessarily the same domain as the regression (the regression domain must be contained within the reconstruction domain, i.e. the regression domain can be smaller). The directory should contain 1 netcdf file per reconstructed year. Each netcdf filename should begin with "recondata", followed by "_", and then 4-digit year and the extension ".nc". For example: recondata_ucrb_2000.nc but you can have anything you need between "recondata" and "yyyy.nc". It should consist of 1 variable "swe" (meters) and 3 dimensions: longitude, latitude, and time where time is day in format YYYYMMDD.
 
 If the reconstruction grid is different from the regression grid then the reconstruction will need to be resampled/cropped to be the same as the fsca and phv variables.
 

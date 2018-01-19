@@ -24,7 +24,7 @@ setup_modeldata <- function(snoteltoday.sp,phvsnotel,simfsca,SNOW_VAR,PHV_VARS,P
 		if(length(rcn_nc_files)==0){
 			stop('you haven\'t provided recondata files in the path specified by PATH_RCNDOWNLOAD (this should be defined at the top of your run files).')
 		}
-		ryrs=as.numeric(sapply(strsplit(rcn_nc_files,split='[_.]'),FUN='[',2))
+		ryrs=as.numeric(sub(pattern='.nc',replacement='',sapply(strsplit(rcn_nc_files,split='[_]'),'[',3)))
 		snow_raster=stack(map(ryrs,get_rcn_nc))
 
 	} else if(SNOW_VAR=='fsca') {
@@ -70,7 +70,8 @@ setup_modeldata <- function(snoteltoday.sp,phvsnotel,simfsca,SNOW_VAR,PHV_VARS,P
 			gather(rdate,rcn,-Site_ID:-dy)
 		# setNames(c(names(snoteltoday.sp),SNOW_VAR)) %>%
 
-		selectrcn_data <- doidata %>%
+		selectrcn_data <-
+		doidata <- doidata %>%
 			mutate(snotel=snotel*fsca/100) %>% #in the paper we showed that scaling the snotel reading by fsca of the pixel improves the regression estimates. but it is statistically invalid for phvfsca estimate
 			left_join(snotel_rcn)
 
@@ -106,7 +107,7 @@ setup_modeldata <- function(snoteltoday.sp,phvsnotel,simfsca,SNOW_VAR,PHV_VARS,P
 			as.character()
 
 		## add only best recon data for model fitting data
-		doidata <- left_join(doidata,snotel_rcn %>% filter(rdate == bestrdate))
+		doidata <- selectrcn_data %>% filter(rdate == bestrdate)#selectrcn_data already contains fsca-scaled snotel
 
 		## get best recon raster
 		snowpred_raster <- snow_raster[[grep(bestrdate,names(snow_raster))]]
