@@ -26,6 +26,7 @@ get_modscag_data=function(doy=NULL,
 													ymax){
 
 	simfscafilename=paste0(imagepath,'/modscag_fsca_',yr,doy,'.tif')
+
 	if(file.exists(simfscafilename)) {
 		print('fsca image exists. nothing to do. returning fsca.')
 		simfsca=raster(simfscafilename)
@@ -38,9 +39,8 @@ get_modscag_data=function(doy=NULL,
 			return(simfsca)
 		}
 
-	}
+	} else if(type=='NRT'){
 
-	if(type=='NRT'){
 		PATH_DOY=paste0(PATH_MODSCAGDOWNLOAD,'/',yr,'/',doy)
 		dir.create(PATH_DOY, showWarnings = FALSE, rec=TRUE)
 		tiffiles=dir(PATH_DOY,'*NRT.snow_fraction.tif$',full.names = TRUE)
@@ -48,9 +48,9 @@ get_modscag_data=function(doy=NULL,
 		if(length(tiffiles)==0){
 			stop('The NRT fsca files do not exist on your computer. please download them from snow-dav using get_NRTmodscag.sh or otherwise (get_NRTmodscag.sh does not exist as part of this package because it uses password protected login for downloads).')
 		}
-	}
 
-	if(type=='historic'){
+	} else if(type=='historic'){
+
 		# if(is.null(imagepath)) print('please provide a path'); stop()
 		# print(getwd())
 		PATH_DOY=paste0(PATH_MODSCAGDOWNLOAD,'/',yr,'/',doy)
