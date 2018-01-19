@@ -114,6 +114,14 @@ setup_modeldata <- function(snoteltoday.sp,phvsnotel,simfsca,SNOW_VAR,PHV_VARS,P
 
 	}
 
+	## check for na in predictor variables
+	row.has.na <- apply(doidata, 1, function(x){any(is.na(x))})
+	if(any(row.has.na)) {
+		warning('Something is wrong. There are NAs in your predictor dataframe. Does your predictor raster have an NA where they shouldn\'t? Proceeding without the station(s) with NA values.')
+		doidata <- na.omit(doidata)
+	}
+
+
 	## combine snow variable with phv data for the domain for subsequent prediction ----
 	predictdF <- bind_cols(ucophv,raster::as.data.frame(snowpred_raster) %>% setNames(SNOW_VAR)) %>% tbl_df
 
