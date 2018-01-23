@@ -7,6 +7,8 @@
 
 get_stationswe_data <- function(station_locs,network){
 
+	# this could get seriously consolidated
+
 	if(network=='snotel'){
 
 		station_locs <- station_locs %>%
@@ -15,14 +17,35 @@ get_stationswe_data <- function(station_locs,network){
 
 		site_id=379
 		for(site_id in station_locs$Site_ID){
-			station_yr_file=file.path(getwd(),paste0(PATH_SNOTEL,'/',site_id,'-',yr,'CY.csv'))
-			if(!file.exists(station_yr_file)){
+
+			site_yr <- paste0(site_id,'_',yr,'CY')
+			station_yr_file=file.path(PATH_SNOTEL,paste0(site_yr,'.csv')) #for previous years, label file without simdate because any download will have all the data for the year.
+			today_yr <- strftime(as.Date(Sys.Date()),'%Y')
+
+print(yr)
+print(today_yr)
+
+			if(yr > today_yr){ #can't download data from a future year
+
+				stop('you are asking for snow from the future or your system time has the wrong year! please fix your dates.')
+
+			} else if(yr == today_yr ){  #data downloads are year-to-date so if simyr is same as current year, then redownload to make sure we have up-to-date data
+
 				URL ="https://wcc.sc.egov.usda.gov/nwcc/view?intervalType=Historic+&report=STAND&timeseries=Daily&format=copy&sitenum="
 				URL = paste0(URL,site_id,'&year=')
 				URL = paste0(URL,yr,'&month=CY')
 				download.file(URL,station_yr_file,method="auto")
+
+			} else if((yr < today_yr) & !file.exists(station_yr_file)){ # for previous years, make sure we have data file. data file will have the whole year
+
+				URL ="https://wcc.sc.egov.usda.gov/nwcc/view?intervalType=Historic+&report=STAND&timeseries=Daily&format=copy&sitenum="
+				URL = paste0(URL,site_id,'&year=')
+				URL = paste0(URL,yr,'&month=CY')
+				download.file(URL,station_yr_file,method="auto")
+
 			}
 		}
+
 		fns = list.files(path = PATH_SNOTEL, pattern = paste0(yr,"CY.csv"))
 		fname=fns[1]
 		allfiles = lapply(fns, function(fname) {
