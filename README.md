@@ -8,8 +8,8 @@ As of v0.2 reconstructed swe can be used to estimate SWE using flag `SNOW_VAR='r
 
 - the statistical model from the paper was upgraded from a step-wise linear regression to an elastic-net linear regression. in short, this means that all the predictor variables get used rather than dropping the variables with the lowest predictive ability or because of multicollinearity.
 
+**NB** v0.3 provided the ability to simulate SWE in California using CDEC stations!
 
 install with `devtools::install_github("hoargroup/stationsweRegression", build_vignettes = TRUE)`
-
 
 Please read the vignettes for details regarding use of the package. These can be read from this github repository or from R with `browseVignettes("stationsweRegression")`.
