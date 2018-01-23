@@ -28,7 +28,7 @@ get_modscag_data=function(doy=NULL,
 	simfscafilename=paste0(imagepath,'/modscag_fsca_',yr,doy,'.tif')
 
 	if(file.exists(simfscafilename)) {
-		print('fsca image exists. nothing to do. returning fsca.')
+		print(' - fsca image exists. nothing to do. returning fsca.')
 		simfsca=raster(simfscafilename)
 		# corners=SpatialPoints(rbind(c(xmin,ymin),c(xmin,ymax),c(xmax,ymax),c(xmax,ymin)))
 		# correct_grid <- rgeos::gCovers(as(extent(simfsca), "SpatialPolygons"), as(extent(corners), "SpatialPolygons"))
@@ -51,15 +51,13 @@ get_modscag_data=function(doy=NULL,
 
 	} else if(type=='historic'){
 
-		# if(is.null(imagepath)) print('please provide a path'); stop()
-		# print(getwd())
 		PATH_DOY=paste0(PATH_MODSCAGDOWNLOAD,'/',yr,'/',doy)
 		dir.create(PATH_DOY, showWarnings = FALSE, rec=TRUE)
 		tiffiles=dir(PATH_DOY,'*snow_fraction.tif$',full.names = TRUE)
 		tiffiles=tiffiles[!grepl("NRT.snow_fraction.tif", tiffiles)]
 
 		if(length(tiffiles)==0) {
-			print('no files found for this date. downloading from snowserver.')
+			print(' - no files found for this date. downloading from snowserver.')
 			system(paste0('scp -i ~/.ssh/snowserver_rsa snowserver.colorado.edu:/data/hydroData/WestUS_Data/MODSCAG/modscag-historic/',yr,'/',doy,'/*fraction.tif ', PATH_DOY,'/'))
 			tiffiles=dir(PATH_DOY,'*snow_fraction.tif$',full.names = TRUE)
 			if(length(tiffiles)==0){

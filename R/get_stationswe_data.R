@@ -67,6 +67,7 @@ get_stationswe_data <- function(station_locs,network){
 			existingDates <- as.Date(sapply(strsplit(x=basename(old_files),split='[._]',fixed=F),'[',3),'%Y%m%d')
 			oldestDateind <- which.max(existingDates)
 			oldestDate <- existingDates[oldestDateind]
+
 		} else {
 			oldestDate <- NA
 		}
@@ -83,12 +84,9 @@ get_stationswe_data <- function(station_locs,network){
 
 			}
 
+			file.remove(old_files)
 			dstatus <- download.file(downloadURL,new_file,method="auto")
 
-		}
-
-		if(length(old_files)>0){
-			file.remove(old_files[-oldestDateind])
 		}
 
 	}
@@ -98,7 +96,7 @@ get_stationswe_data <- function(station_locs,network){
 	dat <- map_df(fns,import_data,.id='Site_ID') %>%
 		mutate(Site_ID=siteIDs[as.numeric(Site_ID)])
 
-	print('done reading files')
+	print(' - done reading files')
 
 	dat2=full_join(station_locs,
 								 dat,by=c('Site_ID'))

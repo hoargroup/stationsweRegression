@@ -21,7 +21,7 @@ I've tried to make the package so it can be extended to use e.g. MOD10A1 fsca an
 ## Dependent Variable
 ### SWE observations
 
-The package will automatically download the snotel observations needed using a bash script.
+The package will automatically download the pillow SWE observations from SNOTEL or CDEC.
 
 ## Independent Variables 
 ### Topographic Variables
@@ -137,8 +137,8 @@ There are 6 outputs. They are written to an `output` folder (and optionally with
 
 3. The model coefficients are written to a separate file for each date. The files are called phvfsca_coefs_<yyyymmdd>.txt.
 
-4. The cross-validated MAE as a percent of observed SWE are written to a separate text file for each date called phvfsca_pctmae_<yyyymmdd>.txt. There is also a combined file called phvfsca_pctmae_combined.txt.
+4. The cross-validated MAE as a percent of observed SWE are written to a separate text file in a subfolder called  `crossval_stats_dates` for each date called phvfsca_pctmae_<yyyymmdd>.txt. There is also a combined file called phvfsca_pctmae_crossval.txt at the same level as `crossval_stats_dates`.
 
-5. The cross-validated r^2 are written to a separate text file for each date called phvfsca_r2_<yyyymmdd>.txt. There is also a combined file called phvfsca_r2_combined.txt.
+5. The cross-validated r^2 are written to a separate text file in a subfolder called  `crossval_stats_dates` for each date called phvfsca_r2_<yyyymmdd>.txt. There is also a combined file called phvfsca_r2_crossval.txt at the same level as `crossval_stats_dates`.
 
 6. Graphics of the modeled SWE and fsca are plotted and saved to `swe_fsca_sidexside` inside `output/w_obscuredstations`. The files are labeled maps_<yyyymmdd>.png

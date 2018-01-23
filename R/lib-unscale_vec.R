@@ -5,7 +5,6 @@
 #' @param scale_values vector with scale attributes to use
 #' @export
 
-
 unscale_vec<-function(vec, scale_values=NULL){
 
 if(length(which(is.na(vec)))==length(vec)){
@@ -19,6 +18,6 @@ if(length(which(is.na(vec)))==length(vec)){
 		std=attr(scale_values,'scaled:scale')
 	}
 	return(
-          vec*std+avg
-          )
+		vec*std+avg
+	)
 }
