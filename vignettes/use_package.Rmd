@@ -90,6 +90,7 @@ The directory name should reflect the model domain name of the reconstruction. T
 
 If the reconstruction grid is different from the regression grid then the reconstruction will need to be resampled/cropped to be the same as the fsca and phv variables.
 
+If you are using the output from [snodis](!https://github.com/hoargroup/snodis), you may be interestd [these conversion scripts](!https://github.com/hoargroup/example_sweRegression/tree/master/convert_snodisoutput).
 
 ## domain directory
 
