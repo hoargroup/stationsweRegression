@@ -17,7 +17,7 @@ setup_modeldata <- function(snoteltoday.sp,phvsnotel,simfsca,SNOW_VAR,PHV_VARS,P
 		stop('too many arguments to setup_modeldata()')
 	}
 
-	myformula <- as.formula(paste0('snotel ~ ',paste(as.character(PHV_VARS)[2],SNOW_VAR,sep=' + ')))
+	myformula <- as.formula(paste0('swe ~ ',paste(as.character(PHV_VARS)[2],SNOW_VAR,sep=' + ')))
 
 	if(SNOW_VAR=='rcn'){
 		rcn_nc_files=dir(PATH_RCNDOWNLOAD,glob2rx('^recondata*.nc$'))
