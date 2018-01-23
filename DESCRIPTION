@@ -5,20 +5,19 @@ Authors@R: person("Dominik", "Schneider", email = "dominik.schneider@colorado.ed
 Description: This package implements a SWE regression algorithm that uses observations from SNOTEL stations, remotely sensed SWE
     (or fSCA), and physiographic variables. See algorithm development details in Schneider and Molotch, 2016, Water Resources Research
 Depends:
-    R (>= 3.3.1)
-Suggests:
+    R (>= 3.3.1),
+    knitr,
+    tidyverse,
+    glmnetUtils,
+    modelr,
+    cowplot,
+    viridis,
+    raster,
     gdalUtils, 
     rgdal, 
     sp, 
-    raster,  
-    RSAGA, 
+Suggests:
 Imports:
-    tidyverse, 
-    glmnetUtils, 
-    modelr, 
-    cowplot, 
-    viridis, 
-    rgeos,
 License: MIT
 Encoding: UTF-8
 LazyData: true

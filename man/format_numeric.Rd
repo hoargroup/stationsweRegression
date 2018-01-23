@@ -8,6 +8,8 @@ format_numeric(x, ...)
 }
 \arguments{
 \item{x}{dataframe to format}
+
+\item{...}{additional arguments to format}
 }
 \description{
 helper function to format output to csvs

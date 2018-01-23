@@ -7,7 +7,11 @@
 
 myr2=function(model,data){
 	yvar=all.vars(formula(model)[[2]])
-	stats::cor(predict(model, data), as.data.frame(data)[[yvar]], use='complete.obs')^2
+	yhat=predict(model, data)
+	# print(yhat)
+	yobs=as.data.frame(data)[[yvar]]
+	# print(yobs)
+	stats::cor(yhat, yobs, use='complete.obs')^2
 }
 
 #' mean absolute error as percent of mean obs

@@ -4,10 +4,12 @@
 \alias{unscale_vec}
 \title{unscale vector}
 \usage{
-unscale_vec(vec)
+unscale_vec(vec, scale_values = NULL)
 }
 \arguments{
 \item{vec}{numeric vector to unscale}
+
+\item{scale_values}{vector with scale attributes to use}
 }
 \description{
 function to unscale column of dataframe

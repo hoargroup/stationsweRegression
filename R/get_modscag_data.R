@@ -32,9 +32,9 @@ get_modscag_data=function(doy=NULL,
 		simfsca=raster(simfscafilename)
 		# corners=SpatialPoints(rbind(c(xmin,ymin),c(xmin,ymax),c(xmax,ymax),c(xmax,ymin)))
 		# correct_grid <- rgeos::gCovers(as(extent(simfsca), "SpatialPolygons"), as(extent(corners), "SpatialPolygons"))
-		correct_extent <- compareRaster(simfsca,raster(xmn=xmin,xmx=xmax,ymn=ymin,ymx=ymax), extent=T,rowcol=F, crs=T, res=F, rotation=F,stopiffalse = F)
+		correct_extent <- compareRaster(simfsca,raster(xmn=xmin,xmx=xmax,ymn=ymin,ymx=ymax), extent=T,rowcol=F, crs=F, res=F, rotation=F,stopiffalse = F)
 		if(!correct_extent){
-			stop('the extents of the existing fsca image do not match the extents provided in the run file. are you using the wrong RUNNAME?')
+			stop(paste0('the extents of the existing fsca image do not match the extents provided in the run file. are you using the wrong RUNNAME? or, if you previously used the wrong extents try deleting ',simfscafilename))
 		} else {
 			return(simfsca)
 		}
@@ -70,7 +70,12 @@ get_modscag_data=function(doy=NULL,
 
 	simfsca=gdalUtils::gdalwarp(tiffiles,simfscafilename,output_Raster = TRUE,t_srs = '+proj=longlat +datum=WGS84',te = c(xmin,ymin,xmax,ymax),tr=c(reso,reso),r='near',dstnodata='-99',ot='Int32')#make sure this is cast at least as a signed integer for -99
 
-	return(simfsca)
+	correct_extent <- compareRaster(simfsca,watermask, extent=T,rowcol=T, crs=T, res=T, rotation=F,stopiffalse = F)
+	if(correct_extent){
+		return(simfsca)
+	} else {
+		stop('The fsca raster created from the given extents does not match the watermask raster.  Are you using the wrong RUNNAME or the wrong domain extents?')
+	}
 
 }
 
