@@ -106,18 +106,24 @@ setup_modeldata <- function(snoteltoday.sp,phvsnotel,simfsca,SNOW_VAR,PHV_VARS,P
 			summarize(best_rdate=rdate[which.min(cvm)]) %>%
 			as.character()
 
-		## add only best recon data for model fitting data
-		doidata <- selectrcn_data %>% filter(rdate == bestrdate)#selectrcn_data already contains fsca-scaled snotel
-
 		## get best recon raster
 		snowpred_raster <- snow_raster[[grep(bestrdate,names(snow_raster))]]
+		rscaled <- scale(values(snowpred_raster))
+		avg=attr(rscaled,'scaled:center')
+		std=attr(rscaled,'scaled:scale')
+		values(snowpred_raster) <- rscaled
+
+		## add only best recon data for model fitting data
+		doidata <- selectrcn_data %>%
+			filter(rdate == bestrdate) %>% #selectrcn_data already contains fsca-scaled snotel
+			mutate(rcn=(rcn-avg)/std)
 
 	}
 
 	## check for na in predictor variables
 	row.has.na <- apply(doidata, 1, function(x){any(is.na(x))})
 	if(any(row.has.na)) {
-		warning('Something is wrong. There are NAs in your predictor dataframe. Does your predictor raster have an NA where they shouldn\'t? Proceeding without the station(s) with NA values.')
+		warning('Something is wrong. There are NAs in your predictor dataframe (doidata). Does your predictor raster have an NA where they shouldn\'t? Proceeding without the station(s) with NA values.')
 		doidata <- na.omit(doidata)
 	}
 
