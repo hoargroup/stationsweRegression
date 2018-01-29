@@ -6,6 +6,7 @@
 #' @param yr year
 #' @param type 'NRT' or 'historic'. near realtime download from snowdav or archived data
 #' @param imagepath the directory where the mosaiced fsca .tif files exist
+#' @param modscagfn 'snow_fraction' or 'snow_fraction_canadj'; portion of the filename before the extension to identify canopy corrected or not corrected modscag;
 #' @param reso resolution of fsca
 #' @param xmin minimum x coordinate of domain
 #' @param xmax maximum x coordinate of domain
@@ -19,13 +20,14 @@ get_modscag_data=function(doy=NULL,
 													yr=NULL,
 													type=NULL,
 													imagepath=NULL,
+													modscagfn='snow_fraction_canadj',
 													reso,
 													xmin,
 													xmax,
 													ymin,
 													ymax){
 
-	simfscafilename=paste0(imagepath,'/modscag_fsca_',yr,doy,'.tif')
+	simfscafilename=paste0(imagepath,'/modscag_',modscagfn,'_',yr,doy,'.tif')
 
 	if(file.exists(simfscafilename)) {
 		print(' - fsca image exists. nothing to do. returning fsca.')
@@ -43,7 +45,7 @@ get_modscag_data=function(doy=NULL,
 
 		PATH_DOY=paste0(PATH_MODSCAGDOWNLOAD,'/',yr,'/',doy)
 		dir.create(PATH_DOY, showWarnings = FALSE, rec=TRUE)
-		tiffiles=dir(PATH_DOY,'*NRT.snow_fraction.tif$',full.names = TRUE)
+		tiffiles=dir(PATH_DOY,paste0('*NRT.',modscagfn,'.tif$'),full.names = TRUE)
 
 		if(length(tiffiles)==0){
 			stop('The NRT fsca files do not exist on your computer. please download them from snow-dav using get_NRTmodscag.sh or otherwise (get_NRTmodscag.sh does not exist as part of this package because it uses password protected login for downloads).')
@@ -53,19 +55,20 @@ get_modscag_data=function(doy=NULL,
 
 		PATH_DOY=paste0(PATH_MODSCAGDOWNLOAD,'/',yr,'/',doy)
 		dir.create(PATH_DOY, showWarnings = FALSE, rec=TRUE)
-		tiffiles=dir(PATH_DOY,'*snow_fraction.tif$',full.names = TRUE)
-		tiffiles=tiffiles[!grepl("NRT.snow_fraction.tif", tiffiles)]
+		tiffiles=dir(PATH_DOY,paset0('*',modscagfn,'.tif$'),full.names = TRUE)
+		tiffiles=tiffiles[!grepl(paste0('NRT.',modscagfn,'.tif'), tiffiles)]
 
 		if(length(tiffiles)==0) {
 			print(' - no files found for this date. downloading from snowserver.')
 			system(paste0('scp -i ~/.ssh/snowserver_rsa snowserver.colorado.edu:/data/hydroData/WestUS_Data/MODSCAG/modscag-historic/',yr,'/',doy,'/*fraction.tif ', PATH_DOY,'/'))
-			tiffiles=dir(PATH_DOY,'*snow_fraction.tif$',full.names = TRUE)
+			tiffiles=dir(PATH_DOY,paste0('*',modscagfn,'.tif$'),full.names = TRUE)
 			if(length(tiffiles)==0){
 				stop('The historic fsca files do not exist on your computer at PATH_MODSCAGDOWNLOAD and I was unable to download them from snowserver.')
 			}
 		}
 	}
 
+	print(' - creating fsca image for the domain')
 	simfsca=gdalUtils::gdalwarp(tiffiles,simfscafilename,output_Raster = TRUE,t_srs = '+proj=longlat +datum=WGS84',te = c(xmin,ymin,xmax,ymax),tr=c(reso,reso),r='near',dstnodata='-99',ot='Int32')#make sure this is cast at least as a signed integer for -99
 
 	correct_extent <- compareRaster(simfsca,watermask, extent=T,rowcol=T, crs=T, res=T, rotation=F,stopiffalse = F)
