@@ -17,15 +17,20 @@ setup_modeldata <- function(snoteltoday.sp,phvsnotel,simfsca,SNOW_VAR,PHV_VARS,P
 		stop('too many arguments to setup_modeldata()')
 	}
 
+	# create complete formula for regression by adding 'swe' as the y variable and 'recon' or 'fsca' as the additional x variable
 	myformula <- as.formula(paste0('swe ~ ',paste(as.character(PHV_VARS)[2],SNOW_VAR,sep=' + ')))
 
 	if(SNOW_VAR=='rcn'){
-		rcn_nc_files=dir(PATH_RCNDOWNLOAD,glob2rx('^recondata*.nc$'))
+		# get all the netcdf reconstruction files that start with "recondata" in the directory specified in the run file
+		rcn_nc_files=dir(PATH_RCNDOWNLOAD,glob2rx('^recondata*.nc$'),full.names=T)
 		if(length(rcn_nc_files)==0){
 			stop('you haven\'t provided recondata files in the path specified by PATH_RCNDOWNLOAD (this should be defined at the top of your run files).')
 		}
-		ryrs=as.numeric(sub(pattern='.nc',replacement='',sapply(strsplit(rcn_nc_files,split='[_]'),'[',3)))
-		snow_raster=stack(map(ryrs,get_rcn_nc))
+		# extract the year of the reconstrcution from the filename. specifically, the year will be the digits between the last '_' and the extension (after the '.')
+		ryrs=as.numeric(sub(pattern='.nc',replacement='',sapply(strsplit(basename(rcn_nc_files),split='[_]'),'[',3)))
+		# stack the raster layers from the netcdf files. check get_rcn_nc to see which dates. currently only 1st and 15th of the month
+		snow_raster=stack(map(ryrs,get_rcn_nc,rcn_nc_files))
+		# check extent with watermask to catch any errors
 		correct_extent <- compareRaster(snow_raster,watermask, extent=T,rowcol=T, crs=T, res=T, rotation=T,stopiffalse = F)
 		if(!correct_extent){
 			stop('the extents of the reconstruction files you provided do not match those of the watermask. did you specify the correct PATH_RCNDOWNLOAD?')
@@ -61,6 +66,18 @@ setup_modeldata <- function(snoteltoday.sp,phvsnotel,simfsca,SNOW_VAR,PHV_VARS,P
 		mutate(fsca=ifelse(fsca>100 & swe>0,100,fsca)) %>% #if the station is obscured but swe>0 then 100% coverage
 		mutate(fsca=ifelse(fsca==0 & swe>0,15,fsca)) %>% #if pixel shows no snow but swe>0, then 15% coverage (modscag detection limit)
 		filter(fsca<=100) #remove stations where pixel is obscured and swe isn't recording snow>0
+
+	num_phv <- nrow(phvsnotel)
+	num_fsca <- nrow(doidata)
+
+	## check for na in predictor variables
+	row.has.na <- apply(doidata, 1, function(x){any(is.na(x))})
+	if(any(row.has.na)) {
+		warning('Something is wrong. There are NAs in your predictor dataframe (doidata). Does your predictor raster have an NA where they shouldn\'t? Proceeding without the station(s) with NA values.')
+		doidata <- na.omit(doidata)
+	}
+
+	num_pred <- nrow(doidata)
 
 	# setup prediction dataframe and add rcn variable to doidata if applicable
 
@@ -114,15 +131,35 @@ setup_modeldata <- function(snoteltoday.sp,phvsnotel,simfsca,SNOW_VAR,PHV_VARS,P
 			filter(rdate == bestrdate) %>% #selectrcn_data already contains fsca-scaled pillow swe
 			mutate(rcn=(rcn-avg)/std)
 
+		if(any(is.na(doidata$rcn))){
+			stop(paste0('There are nodata values in your reconstruction at snow pillow locations for the best recon date (',bestrdate,'). This should not be.'))
+		}
 	}
 
-	## check for na in predictor variables
-	row.has.na <- apply(doidata, 1, function(x){any(is.na(x))})
-	if(any(row.has.na)) {
-		warning('Something is wrong. There are NAs in your predictor dataframe (doidata). Does your predictor raster have an NA where they shouldn\'t? Proceeding without the station(s) with NA values.')
-		doidata <- na.omit(doidata)
+	## Print some informational statements and save modeling data to a file
+	line1=paste0(' - Stations online: ',num_phv)
+	line2=paste0(' - Stations removed for which the modscag pixel is not reporting data (clouds, not run, or otherwise) and the snow pillow is reporting 0 swe: ',num_phv-num_fsca)
+	line3=paste0(' - Stations removed because the predictor data include nodata values- you should fix this: ',num_fsca-num_pred)
+
+	print(line1)
+	print(line2)
+	print(line3)
+
+	forFile <- function(ch){
+		gsub(pattern = ' - ',replacement = '# ',ch)
 	}
 
+	options(warn=-1)
+	fileConn <- file(file.path(PATH_OUTPUT,paste0('modeldata_',datestr,'.txt')), open='w')
+	writeLines(paste0('# SWE Regression for ',simdate,' in the ',RUNNAME,'domain'),fileConn)
+	writeLines(forFile(line1), fileConn)
+	writeLines(forFile(line2), fileConn)
+	writeLines(forFile(line3), fileConn)
+	writeLines('#',fileConn)
+	writeLines('# This is the model data:', fileConn)
+	write.table(doidata, file=fileConn, sep='\t', col.names=T,row.names=F, quote=F,append=T)
+	close(fileConn)
+	options(warn = 0)
 
 	## combine snow variable with phv data for the domain for subsequent prediction ----
 	predictdF <- bind_cols(ucophv,raster::as.data.frame(snowpred_raster) %>% setNames(SNOW_VAR)) %>% tbl_df

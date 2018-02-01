@@ -8,9 +8,9 @@ setup_modeldata(snoteltoday.sp, phvsnotel, simfsca, SNOW_VAR, PHV_VARS,
   PATH_RCNDOWNLOAD)
 }
 \arguments{
-\item{snoteltoday.sp}{spatialpoints data frame of the snotel data for the simulation date}
+\item{snoteltoday.sp}{spatialpoints data frame of the pillow data for the simulation date}
 
-\item{phvsnotel}{dataframe containing the physiographic values for the pixels that contain snotel stations}
+\item{phvsnotel}{dataframe containing the physiographic values for the pixels that contain pillow stations}
 
 \item{simfsca}{raster. modscag image of fsca for the simulation date}
 

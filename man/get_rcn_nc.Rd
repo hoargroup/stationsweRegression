@@ -4,10 +4,12 @@
 \alias{get_rcn_nc}
 \title{function to extract the 1st and 15th of each month from a single year of reconstruction}
 \usage{
-get_rcn_nc(ryr)
+get_rcn_nc(ryr, nc_fns)
 }
 \arguments{
 \item{ryr}{the year of reconstruction}
+
+\item{nc_fns}{filenames of the netcdf reconstruction}
 }
 \value{
 rasterstack of reconstructed swe for the 1st and 15th of each year present in recondata*.nc files

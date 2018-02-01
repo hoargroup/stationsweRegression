@@ -3,6 +3,7 @@
 export(format_numeric)
 export(get_inv)
 export(get_modscag_data)
+export(get_rcn_nc)
 export(get_stationswe_data)
 export(gnet_phvfsca)
 export(import_dates)
