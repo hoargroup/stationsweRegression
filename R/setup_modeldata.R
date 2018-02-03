@@ -50,34 +50,28 @@ setup_modeldata <- function(snoteltoday.sp,phvsnotel,simfsca,SNOW_VAR,PHV_VARS,P
 	# perform some basic quality control between satellite fsca and pillow swe
 
 	## extract fsca data for the station pixels ----
-	newnames=c(names(snoteltoday.sp),'fsca')
+	newnames=c('Site_ID','longitude','latitude','dte','pillowswe','modscag')
 	snotel_fsca <-
 		raster::extract(simfsca,snoteltoday.sp,sp=T) %>%
-		as.data.frame() %>%
 		tbl_df %>%
-		dplyr::select(-Longitude,-Latitude) %>%
 		setNames(newnames) %>%
 		mutate_if(is.factor,as.character)
 
-	## join station fsca and swe data with station phv data ----
 	## take care of some inconsistencies between fsca and pillow
+	## will export data4gis later after adding rcn (if applicable)
+	data4gis <-
+		snotel_fsca %>%
+		mutate(fsca=modscag,
+					 fsca=ifelse(fsca>100 & pillowswe>0,100,fsca),  #if the station is obscured but swe>0 then 100% coverage
+					 fsca=ifelse(fsca==0 & pillowswe>0,15,fsca), #if pixel shows no snow but swe>0, then 15% coverage (modscag detection limit)
+					 fsca=ifelse(!is.na(modscag) & is.na(fsca), modscag,fsca)) #fix result when pillowswe is NA
+
+
+	## join station fsca and swe data with station phv data
 	doidata <-
-		inner_join(snotel_fsca,phvsnotel,by=c('Site_ID')) %>%
-		mutate(fsca=ifelse(fsca>100 & swe>0,100,fsca)) %>% #if the station is obscured but swe>0 then 100% coverage
-		mutate(fsca=ifelse(fsca==0 & swe>0,15,fsca)) %>% #if pixel shows no snow but swe>0, then 15% coverage (modscag detection limit)
-		filter(fsca<=100) #remove stations where pixel is obscured and swe isn't recording snow>0
-
-	num_phv <- nrow(phvsnotel)
-	num_fsca <- nrow(doidata)
-
-	## check for na in predictor variables
-	row.has.na <- apply(doidata, 1, function(x){any(is.na(x))})
-	if(any(row.has.na)) {
-		warning('Something is wrong. There are NAs in your predictor dataframe (doidata). Does your predictor raster have an NA where they shouldn\'t? Proceeding without the station(s) with NA values.')
-		doidata <- na.omit(doidata)
-	}
-
-	num_pred <- nrow(doidata)
+		data4gis %>%
+		dplyr::select(-longitude,-latitude) %>% #don't need these columns anymore
+		inner_join(phvsnotel,by=c('Site_ID'))
 
 	# setup prediction dataframe and add rcn variable to doidata if applicable
 
@@ -85,17 +79,16 @@ setup_modeldata <- function(snoteltoday.sp,phvsnotel,simfsca,SNOW_VAR,PHV_VARS,P
 
 		snotel_rcn <-
 			raster::extract(snow_raster,snoteltoday.sp,sp=T) %>%
-			as.data.frame() %>%
 			tbl_df %>%
-			dplyr::select(-Longitude, -Latitude, -swe) %>% #remove swe so we don't run into troubel when we join below and scale the swe value
+			dplyr::select(-Longitude, -Latitude, -pillowswe) %>% #remove pillowswe so we don't run into troubel when we join below and scale the swe value
 			mutate_if(is.factor,as.character) %>%
-			gather(rdate,rcn,-Site_ID:-dy)
+			gather(rdate,rcn,-Site_ID:-dte)
 		# setNames(c(names(snoteltoday.sp),SNOW_VAR)) %>%
 
 		selectrcn_data <-
 			doidata %>%
-			mutate(swe=swe*fsca/100) %>% #in the paper we showed that scaling the swe reading by fsca of the pixel improves the regression estimates. but it is statistically invalid for phvfsca estimate
-			left_join(snotel_rcn, by=c("Site_ID", "dte", "yr", "doy", "yrdoy", "dy"))
+			mutate(swe=pillowswe*fsca/100) %>% #in the paper we showed that scaling the swe reading by fsca of the pixel improves the regression estimates. but it is statistically invalid for phvfsca estimate
+			left_join(snotel_rcn, by=c("Site_ID", "dte"))
 
 
 		print(' - selecting the best recon date...')
@@ -112,7 +105,6 @@ setup_modeldata <- function(snoteltoday.sp,phvsnotel,simfsca,SNOW_VAR,PHV_VARS,P
 			mutate(
 				cvm=map_dbl(data,extract_cvm,myformula))
 
-
 		bestrdate <-
 			selectrcn_cvm %>%
 			ungroup() %>%
@@ -127,37 +119,94 @@ setup_modeldata <- function(snoteltoday.sp,phvsnotel,simfsca,SNOW_VAR,PHV_VARS,P
 		values(snowpred_raster) <- rscaled
 
 		## add only best recon data for model fitting data
-		doidata <- selectrcn_data %>%
-			filter(rdate == bestrdate) %>% #selectrcn_data already contains fsca-scaled pillow swe
+		doidata <-
+			selectrcn_data %>%
+			filter(rdate == bestrdate) %>%  #selectrcn_data already contains fsca-scaled pillow swe
 			mutate(rcn=(rcn-avg)/std)
+
+		## combine fsca, pillow, recon data without any filtering to output to gpkg
+		data4gis <-
+			data4gis %>%
+			mutate(swe=pillowswe*fsca/100) %>% #need to do this again
+			left_join(snotel_rcn %>%
+									filter(rdate==bestrdate),
+								by=c('Site_ID','dte'))
 
 		if(any(is.na(doidata$rcn))){
 			stop(paste0('There are nodata values in your reconstruction at snow pillow locations for the best recon date (',bestrdate,'). This should not be.'))
 		}
+
+	}
+	else if(SNOW_VAR=='fsca'){
+		doidata <-
+			doidata %>%
+			mutate(swe=pillowswe)
+	}
+
+
+	## export data4gis with all downloaded stations
+	coordinates(data4gis) <- ~longitude+latitude
+	proj4string(data4gis) <- proj4string(snoteltoday.sp)
+	data4gis <- extract(phvstack,data4gis,sp=T)#add phv values for each station
+	snotelfilename=paste0(PATH_OUTPUT,'/pillow-',strftime(simdate,'%d%b%Y'),'.gpkg')
+	# if(!file.exists(snotelfilename)){
+		writeOGR(data4gis,dsn=snotelfilename,layer='pillow_data',driver='GPKG',overwrite_layer=TRUE)
+	# }
+
+	## find out which stations are missing data and filter
+	### statiosn not reporting
+	pillowNA <- is.na(doidata$pillowswe)
+	num_pillowNA <- length(which(pillowNA))
+
+	### remove stations where pixel is obscured and swe isn't recording snow>0 (could be NA or 0). left over from previous filtering
+	fscaNA <- doidata$fsca>100 | is.na(doidata$fsca)#also check for na in fsca, just in case
+	num_fscaNA <- length(which(fscaNA))
+
+	doidata <-
+		doidata %>%
+		filter(!pillowNA,!fscaNA) #remove nodata. these should catch nodata in swe column too
+
+	## check for na in predictor variables
+	row.has.na <- apply(doidata, 1, function(x){any(is.na(x))})
+	if(any(row.has.na)) {
+		warning('Something is wrong. There are NAs in your predictor dataframe (doidata). Does your predictor raster have an NA where they shouldn\'t? Proceeding without the station(s) with NA values.')
+		pred_dropped <- doidata[row.has.na,]$Site_ID
+		doidata <- na.omit(doidata)
+	} else {
+		pred_dropped <- ''
 	}
 
 	## Print some informational statements and save modeling data to a file
-	line1=paste0(' - Stations online: ',num_phv)
-	line2=paste0(' - Stations removed for which the modscag pixel is not reporting data (clouds, not run, or otherwise) and the snow pillow is reporting 0 swe: ',num_phv-num_fsca)
-	line3=paste0(' - Stations removed because the predictor data include nodata values- you should fix this: ',num_fsca-num_pred)
+	line1=paste0(' - Stations downloaded: ',nrow(phvsnotel))
+	line2=paste0(' - Stations removed for which the modscag pixel is not reporting data (clouds, not run, or otherwise) and the snow pillow is reporting no swe: ',num_fscaNA)
+	line3=paste0(' - Stations removed because the predictor data include nodata values- you should fix this: ', length(pred_dropped))
+	line4=paste0(' - Stations used in analysis: ',nrow(doidata))
+	line5=paste0(' - Bad predictor data for Site ID: ',paste(pred_dropped, collapse=', '), ' (but still present in gpkg).')
 
 	print(line1)
+	print(line4)
 	print(line2)
 	print(line3)
+	print(line5)
+	print(' - See modeldata details in the modeldata_<date>.txt file in your output folder.')
 
 	forFile <- function(ch){
 		gsub(pattern = ' - ',replacement = '# ',ch)
 	}
 
+	# save model information to file
 	options(warn=-1)
 	fileConn <- file(file.path(PATH_OUTPUT,paste0('modeldata_',datestr,'.txt')), open='w')
-	writeLines(paste0('# SWE Regression for ',simdate,' in the ',RUNNAME,'domain'),fileConn)
+	writeLines(paste0('# SWE Regression for ',simdate,' in the ',RUNNAME,' domain'),fileConn)
+	writeLines(paste0('# predicted with SNOW_VAR: ',SNOW_VAR),fileConn)
 	writeLines(forFile(line1), fileConn)
 	writeLines(forFile(line2), fileConn)
 	writeLines(forFile(line3), fileConn)
+	writeLines(forFile(line4), fileConn)
+	writeLines(forFile(line5), fileConn)
 	writeLines('#',fileConn)
-	writeLines('# This is the model data:', fileConn)
-	write.table(doidata, file=fileConn, sep='\t', col.names=T,row.names=F, quote=F,append=T)
+	writeLines('# This is the model data (columns lat/lon are for the pixel):', fileConn)
+	readr::write_tsv(data4gis %>% tbl_df %>% filter(!(Site_ID %in% pred_dropped)), path=fileConn, col_names=T, append=T)
 	close(fileConn)
 	options(warn = 0)
 

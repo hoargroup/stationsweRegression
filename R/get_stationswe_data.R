@@ -22,7 +22,7 @@ get_stationswe_data <- function(station_locs,network){
 								 	col_number()
 								 ),
 								 skip=1,
-								 col_names = c('dte','swe')
+								 col_names = c('dte','pillowswe')
 				)}, error = function(e){
 					data_frame()
 				})
@@ -39,7 +39,7 @@ get_stationswe_data <- function(station_locs,network){
 								 	col_time(format='%H%M'),
 								 	col_number()
 								 ),
-								 col_names = c('dte','time','swe')
+								 col_names = c('dte','time','pillowswe')
 				)}, error = function(e){
 					data_frame()
 				})
@@ -102,10 +102,10 @@ get_stationswe_data <- function(station_locs,network){
 								 dat,by=c('Site_ID'))
 
 	pillowdata=dat2 %>%
-		dplyr::select(Site_ID, Longitude, Latitude, dte, swe) %>%
+		dplyr::select(Site_ID, Longitude, Latitude, dte, pillowswe) %>%
 		mutate(
-			swe=replace(swe,swe<0,  NA),
-			swe=swe*2.54/100)#convert inches to meters
+			pillowswe=replace(pillowswe,pillowswe<0,  NA),
+			pillowswe=pillowswe*2.54/100)#convert inches to meters
 
 
 	return(pillowdata)
