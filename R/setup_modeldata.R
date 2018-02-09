@@ -115,6 +115,8 @@ setup_modeldata <- function(snoteltoday.sp,phvsnotel,simfsca,SNOW_VAR,PHV_VARS,P
 			summarize(best_rdate=rdate[which.min(cvm)]) %>%
 			as.character()
 
+		print(paste0('   ... best historical recon date: ',strptime(bestrdate,'X%Y%m%d')))
+
 		## get best recon raster
 		snowpred_raster <- snow_raster[[grep(bestrdate,names(snow_raster))]]
 		rscaled <- scale(values(snowpred_raster))
@@ -145,6 +147,7 @@ setup_modeldata <- function(snoteltoday.sp,phvsnotel,simfsca,SNOW_VAR,PHV_VARS,P
 		doidata <-
 			doidata %>%
 			mutate(swe=pillowswe)
+		bestrdate = NA
 	}
 
 
@@ -175,15 +178,17 @@ setup_modeldata <- function(snoteltoday.sp,phvsnotel,simfsca,SNOW_VAR,PHV_VARS,P
 	if(any(row.has.na)) {
 		warning('Something is wrong. There are NAs in your predictor dataframe (doidata). Does your predictor raster have an NA where they shouldn\'t? Proceeding without the station(s) with NA values.')
 		pred_dropped <- doidata[row.has.na,]$Site_ID
+		numDropped <- length(pred_dropped)
 		doidata <- na.omit(doidata)
 	} else {
-		pred_dropped <- ''
+		pred_dropped <- 'none'
+		numDropped <- 0
 	}
 
 	## Print some informational statements and save modeling data to a file
 	line1=paste0(' - Stations downloaded: ',nrow(phvsnotel))
 	line2=paste0(' - Stations removed for which the modscag pixel is not reporting data (clouds, not run, or otherwise) and the snow pillow is reporting no swe: ',num_fscaNA)
-	line3=paste0(' - Stations removed because the predictor data include nodata values- you should fix this: ', length(pred_dropped))
+	line3=paste0(' - Stations removed because the predictor data include nodata values- you should fix this: ', numDropped)
 	line4=paste0(' - Stations used in analysis: ',nrow(doidata))
 	line5=paste0(' - Bad predictor data for Site ID: ',paste(pred_dropped, collapse=', '), ' (but still present in gpkg).')
 
@@ -203,6 +208,7 @@ setup_modeldata <- function(snoteltoday.sp,phvsnotel,simfsca,SNOW_VAR,PHV_VARS,P
 	fileConn <- file(file.path(PATH_OUTPUT,paste0('modeldata_',datestr,'.txt')), open='w')
 	writeLines(paste0('# SWE Regression for ',simdate,' in the ',RUNNAME,' domain'),fileConn)
 	writeLines(paste0('# predicted with SNOW_VAR: ',SNOW_VAR),fileConn)
+	writeLines('# historical recon date used: ', strptime(bestrdate,'X%Y%m%d'))
 	writeLines(forFile(line1), fileConn)
 	writeLines(forFile(line2), fileConn)
 	writeLines(forFile(line3), fileConn)
