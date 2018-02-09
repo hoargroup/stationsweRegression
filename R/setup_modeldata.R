@@ -27,7 +27,11 @@ setup_modeldata <- function(snoteltoday.sp,phvsnotel,simfsca,SNOW_VAR,PHV_VARS,P
 			stop('you haven\'t provided recondata files in the path specified by PATH_RCNDOWNLOAD (this should be defined at the top of your run files).')
 		}
 		# extract the year of the reconstrcution from the filename. specifically, the year will be the digits between the last '_' and the extension (after the '.')
-		ryrs=as.numeric(sub(pattern='.nc',replacement='',sapply(strsplit(basename(rcn_nc_files),split='[_]'),'[',3)))
+		nameLen=function(nm){
+			noext <- strsplit(basename(nm),split='.nc',fixed=T)
+			as.numeric(substr(noext,nchar(noext)-3,nchar(noext)))
+		}
+		ryrs <- purrr::map_dbl(rcn_nc_files,nameLen)
 		# stack the raster layers from the netcdf files. check get_rcn_nc to see which dates. currently only 1st and 15th of the month
 		snow_raster=stack(map(ryrs,get_rcn_nc,rcn_nc_files))
 		# check extent with watermask to catch any errors
