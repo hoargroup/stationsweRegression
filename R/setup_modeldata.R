@@ -208,7 +208,7 @@ setup_modeldata <- function(snoteltoday.sp,phvsnotel,simfsca,SNOW_VAR,PHV_VARS,P
 	fileConn <- file(file.path(PATH_OUTPUT,paste0('modeldata_',datestr,'.txt')), open='w')
 	writeLines(paste0('# SWE Regression for ',simdate,' in the ',RUNNAME,' domain'),fileConn)
 	writeLines(paste0('# predicted with SNOW_VAR: ',SNOW_VAR),fileConn)
-	writeLines('# historical recon date used: ', strptime(bestrdate,'X%Y%m%d'))
+	writeLines(paste0('# historical recon date used: ', strptime(bestrdate,'X%Y%m%d')), fileConn)
 	writeLines(forFile(line1), fileConn)
 	writeLines(forFile(line2), fileConn)
 	writeLines(forFile(line3), fileConn)
