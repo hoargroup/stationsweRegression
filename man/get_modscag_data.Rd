@@ -4,8 +4,8 @@
 \alias{get_modscag_data}
 \title{Function to get MODSCAG data.}
 \usage{
-get_modscag_data(doy = NULL, yr = NULL, type = NULL, imagepath = NULL,
-  modscagfn = "snow_fraction_canadj", reso, xmin, xmax, ymin, ymax)
+get_modscag_data(doy, yr, type, imagepath, modscagfn = "snow_fraction",
+  fveg_correction = TRUE, reso, xmin, xmax, ymin, ymax)
 }
 \arguments{
 \item{doy}{day of year}
@@ -17,6 +17,8 @@ get_modscag_data(doy = NULL, yr = NULL, type = NULL, imagepath = NULL,
 \item{imagepath}{the directory where the mosaiced fsca .tif files exist}
 
 \item{modscagfn}{'snow_fraction' or 'snow_fraction_canadj'; portion of the filename before the extension to identify canopy corrected or not corrected modscag;}
+
+\item{fveg_correction}{logical, default TRUE. should fsca be corrected by modscag fveg?}
 
 \item{reso}{resolution of fsca}
 

@@ -10,11 +10,12 @@ get_stationswe_data <- function(station_locs,network){
 	#define import functions for different networks
 	if(network=='snotel'){
 		station_locs <- station_locs %>%#some additional filtering possible with snotel network
-			filter(start_date<simdate) %>%
-			filter(end_date>simdate)
+			filter(start_date<=simdate) %>%
+			filter(end_date>=simdate)
 
 		import_data <- function(fn){
 			tryCatch({
+				# print(fn)
 				read_csv(fn,
 								 comment='#',
 								 col_types = list(
@@ -23,7 +24,15 @@ get_stationswe_data <- function(station_locs,network){
 								 ),
 								 skip=1,
 								 col_names = c('dte','pillowswe')
-				)}, error = function(e){
+					) %>%
+					mutate(fn=basename(fn)) %>%
+					separate(fn,into=c('network','Site_ID','dtestr'),sep='_',remove=TRUE)
+
+				}, warning = function(w){
+					print(paste0('warning reading ',fn))
+				},
+					error = function(e){
+					print(paste0('error reading ',fn))
 					data_frame()
 				})
 		}
@@ -40,7 +49,11 @@ get_stationswe_data <- function(station_locs,network){
 								 	col_number()
 								 ),
 								 col_names = c('dte','time','pillowswe')
-				)}, error = function(e){
+				) %>%
+					mutate(fn=basename(fn)) %>%
+					separate(fn,into=c('network','Site_ID','dtestr'),sep='_',remove=TRUE)
+
+				}, error = function(e){
 					data_frame()
 				})
 		}
@@ -53,8 +66,6 @@ get_stationswe_data <- function(station_locs,network){
 
 
 	# cycle through stations to download if necessary. will not download the data again if a file already exists with an equal or later date than the simulation date.
-
-
 	iloc=1
 	for(iloc in 1:nrow(station_locs)){# use loop with index isntead of value so you can access State for the same row later
 		site_id <- station_locs$Site_ID[iloc]
@@ -93,12 +104,15 @@ get_stationswe_data <- function(station_locs,network){
 
 	fns = list.files(path = PATH_SNOTEL, pattern = glob2rx(paste0(network,'*.csv')),full.names=T)
 	siteIDs <- sapply(strsplit(basename(fns),'[._]',fixed=F),'[',2)
-	dat <- map_df(fns,import_data,.id='Site_ID') %>%
-		mutate(Site_ID=siteIDs[as.numeric(Site_ID)])
+	dat <- map_df(fns,import_data,.id=NULL)
+
+	if(length(unique(dat$Site_ID))!=length(siteIDs)){
+		print(paste0(' - Site data did not download correctly: ',siteIDs[!(siteIDs %in% dat$Site_ID)],collapse=', '))
+	}
 
 	print(' - done reading files')
 
-	dat2=full_join(station_locs,
+	dat2=right_join(station_locs,
 								 dat,by=c('Site_ID'))
 
 	pillowdata=dat2 %>%
@@ -106,7 +120,6 @@ get_stationswe_data <- function(station_locs,network){
 		mutate(
 			pillowswe=replace(pillowswe,pillowswe<0,  NA),
 			pillowswe=pillowswe*2.54/100)#convert inches to meters
-
 
 	return(pillowdata)
 

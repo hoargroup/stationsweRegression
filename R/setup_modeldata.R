@@ -40,7 +40,6 @@ setup_modeldata <- function(snoteltoday.sp,phvsnotel,simfsca,SNOW_VAR,PHV_VARS,P
 			stop('the extents of the reconstruction files you provided do not match those of the watermask. did you specify the correct PATH_RCNDOWNLOAD?')
 		}
 
-
 	} else if(SNOW_VAR=='fsca') {
 
 		snowpred_raster=simfsca
@@ -186,11 +185,11 @@ setup_modeldata <- function(snoteltoday.sp,phvsnotel,simfsca,SNOW_VAR,PHV_VARS,P
 	}
 
 	## Print some informational statements and save modeling data to a file
-	line1=paste0(' - Stations downloaded: ',nrow(phvsnotel))
+	line1=paste0(' - Stations in inventory: ',nrow(phvsnotel))
 	line2=paste0(' - Stations removed for which the modscag pixel is not reporting data (clouds, not run, or otherwise) and the snow pillow is reporting no swe: ',num_fscaNA)
 	line3=paste0(' - Stations removed because the predictor data include nodata values- you should fix this: ', numDropped)
 	line4=paste0(' - Stations used in analysis: ',nrow(doidata))
-	line5=paste0(' - Bad predictor data for Site ID: ',paste(pred_dropped, collapse=', '), ' (but still present in gpkg).')
+	line5=paste0(' - Bad predictor data for Site ID: ',paste(pred_dropped, collapse=', '), ' (any dropped stations are still present in gpkg).')
 
 	print(line1)
 	print(line4)
