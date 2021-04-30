@@ -10,6 +10,51 @@ As of v0.2 reconstructed swe can be used to estimate SWE using flag `SNOW_VAR='r
 
 **NB** v0.3 provided the ability to simulate SWE in California using CDEC stations!
 
+## Installation
+
 install with `devtools::install_github("hoargroup/stationsweRegression", build_vignettes = TRUE)`
 
+See notes below for setting up your R environment **before** the running the above command in R.
+
+### Windows
+
+Install R if you haven't:
+https://cran.r-project.org -> Download R for Windows -> base -> install .exe 
+
+Install Rtools to be able to compile (not sure if this is needed as just a user):
+https://cran.r-project.org -> Download R for Windows -> Rtools -> follow instructions
+
+Install RStudio for your R interface
+https://www.rstudio.com/products/rstudio/download/#download
+
+In R:
+```
+install.packages(c("installr","devtools"))
+library(installr) 
+install.pandoc()
+
+devtools::install_github("hoargroup/stationsweRegression", build_vignettes = TRUE)
+```
+
+
+### Ubuntu
+
+Install R if you haven't:
+https://cran.r-project.org -> Download R for Linux -> Ubuntu (but pick your distribution if not ubuntu) -> follow instructions
+
+commandline:
+```
+sudo apt install --no-install-recommends r-base r-cran-devtools libcurl4-openssl-dev pandoc zlibc r-cran-gdalUtils r-cran-glmnetUtils r-cran-raster r-cran-tidyverse
+```
+
+Install RStudio for your R interface
+https://www.rstudio.com/products/rstudio/download/#download
+
+Then open R and run `devtools::install_github("hoargroup/stationsweRegression", build_vignettes = TRUE)`
+
+
+## Usage
+
 Please read the vignettes for details regarding use of the package. These can be read from this github repository or from R with `browseVignettes("stationsweRegression")`.
+
+
