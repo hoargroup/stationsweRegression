@@ -17,6 +17,7 @@ Depends:
     rgdal, 
     sp, 
 Suggests:
+    rmarkdown
 Imports:
 License: MIT
 Encoding: UTF-8
