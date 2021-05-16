@@ -43,7 +43,7 @@ get_modscag_data=function(doy,
 
 	#check if domain fsca file exists already
 	if(file.exists(simfscafilename)) {
-		print(' - fsca image exists. nothing to do. returning fsca.')
+		print('fSCA image exists. nothing to do. returning fsca.')
 		simfsca=raster(simfscafilename)
 		# corners=SpatialPoints(rbind(c(xmin,ymin),c(xmin,ymax),c(xmax,ymax),c(xmax,ymin)))
 		# correct_grid <- rgeos::gCovers(as(extent(simfsca), "SpatialPolygons"), as(extent(corners), "SpatialPolygons"))
@@ -84,7 +84,7 @@ get_modscag_data=function(doy,
 		tiffiles=tiffiles[!grepl(paste0('NRT.',modscagfn,'.tif'), tiffiles)]
 
 		if(length(tiffiles)==0) {
-			print(' - no files found for this date. downloading from snowserver.')
+			print('No files found for this date. downloading from snowserver.')
 			dir.create(PATH_DOY,rec=TRUE)
 			system(paste0('scp -i ~/.ssh/snowserver_rsa snowserver.colorado.edu:/data/hydroData/WestUS_Data/MODSCAG/modscag-historic/',yr,'/',doy,'/*',modscagfn,'.tif ', PATH_DOY,'/'))
 			tiffiles=dir(PATH_DOY,paste0('*',modscagfn,'.tif$'),full.names = TRUE)
