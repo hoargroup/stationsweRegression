@@ -94,7 +94,7 @@ setup_modeldata <- function(snoteltoday.sp,phvsnotel,simfsca,SNOW_VAR,PHV_VARS,P
 			left_join(snotel_rcn, by=c("Site_ID", "dte"))
 
 
-		print(' - selecting the best recon date...')
+		print('Selecting the best recon date...')
 
 		extract_cvm <- function(data,myformula){
 			cvglmnet_object <- gnet_phvfsca(data,myformula)
@@ -114,7 +114,7 @@ setup_modeldata <- function(snoteltoday.sp,phvsnotel,simfsca,SNOW_VAR,PHV_VARS,P
 			summarize(best_rdate=rdate[which.min(cvm)]) %>%
 			as.character()
 
-		print(paste0('   ... best historical recon date: ',strptime(bestrdate,'X%Y%m%d')))
+		print(paste0('... best historical recon date: ',strptime(bestrdate,'X%Y%m%d')))
 
 		## get best recon raster
 		snowpred_raster <- snow_raster[[grep(bestrdate,names(snow_raster))]]
@@ -141,8 +141,7 @@ setup_modeldata <- function(snoteltoday.sp,phvsnotel,simfsca,SNOW_VAR,PHV_VARS,P
 			stop(paste0('There are nodata values in your reconstruction at snow pillow locations for the best recon date (',bestrdate,'). This should not be.'))
 		}
 
-	}
-	else if(SNOW_VAR=='fsca'){
+	}	else if(SNOW_VAR=='fsca'){
 		doidata <-
 			doidata %>%
 			mutate(swe=pillowswe)
@@ -176,7 +175,7 @@ setup_modeldata <- function(snoteltoday.sp,phvsnotel,simfsca,SNOW_VAR,PHV_VARS,P
 	row.has.na <- apply(doidata, 1, function(x){any(is.na(x))})
 	if(any(row.has.na)) {
 		warning('Something is wrong. There are NAs in your predictor dataframe (doidata). Does your predictor raster have an NA where they shouldn\'t? Proceeding without the station(s) with NA values.')
-		pred_dropped <- doidata[row.has.na,]$Site_ID
+		pred_dropped <- unique(doidata[row.has.na,]$Site_ID)
 		numDropped <- length(pred_dropped)
 		doidata <- na.omit(doidata)
 	} else {
@@ -215,7 +214,8 @@ setup_modeldata <- function(snoteltoday.sp,phvsnotel,simfsca,SNOW_VAR,PHV_VARS,P
 	writeLines(forFile(line5), fileConn)
 	writeLines('#',fileConn)
 	writeLines('# This is the model data (columns lat/lon are for the pixel):', fileConn)
-	readr::write_tsv(data4gis %>% as_tibble %>% filter(!(Site_ID %in% pred_dropped)), file=fileConn, col_names=T, append=T)
+	data4file = data4gis %>% as_tibble %>% filter(!(Site_ID %in% pred_dropped))
+	write.table(data4file, sep = '\t', row.names = F, file=fileConn, quote=F, append=T, col.names=T)
 	close(fileConn)
 	options(warn = 0)
 

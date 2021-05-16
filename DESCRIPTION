@@ -16,7 +16,8 @@ Depends:
     gdalUtils, 
     rgdal, 
     sp, 
-    ncdf4
+    ncdf4,
+    terra
 Suggests:
     rmarkdown
 Imports:
