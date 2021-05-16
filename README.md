@@ -44,7 +44,7 @@ https://cran.r-project.org -> Download R for Linux -> Ubuntu (but pick your dist
 
 commandline:
 ```
-sudo apt install --no-install-recommends r-base r-cran-devtools libcurl4-openssl-dev pandoc zlibc r-cran-gdalUtils r-cran-glmnetUtils r-cran-raster r-cran-tidyverse
+sudo apt install --no-install-recommends r-base r-cran-devtools libcurl4-openssl-dev pandoc zlibc r-cran-gdalUtils r-cran-glmnetUtils r-cran-raster r-cran-tidyverse r-cran-ncdf4
 ```
 
 Install RStudio for your R interface

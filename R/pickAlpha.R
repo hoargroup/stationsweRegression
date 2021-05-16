@@ -11,14 +11,14 @@ pickAlpha=function(dF,myformula,nfolds,cl=cl){
 	maxlambda=100
 	alpha=cvalpha$alpha
 	ialpha=1
-	cvdf=data_frame(alpha) %>%
-		bind_cols(data.frame(matrix(NA,ncol=maxlambda,nrow=length(alpha)))) %>%
-		bind_cols(as.data.frame(matrix(NA,ncol=maxlambda,nrow=length(alpha))))#
+	cvdf=tibble(alpha) %>%
+		bind_cols(data.frame(matrix(NA_real_,ncol=maxlambda,nrow=length(alpha)))) %>%
+		bind_cols(as.data.frame(matrix(NA_real_,ncol=maxlambda,nrow=length(alpha))))#
 	for(ialpha in seq_along(alpha)){
 		cvlambdas=cvalpha$modlist[[ialpha]]$lambda
 		numlambda=length(cvlambdas)
-		cvdf[ialpha,2:(numlambda+1)] <- cvlambdas
-		cvdf[ialpha,maxlambda+1+(1:numlambda)] <- cvalpha$modlist[[ialpha]]$cvm
+		cvdf[ialpha,2:(numlambda+1)] <- as.list(cvlambdas)
+		cvdf[ialpha,maxlambda+1+(1:numlambda)] <- as.list(cvalpha$modlist[[ialpha]]$cvm)
 	}
 	cvresults <-
 		cvdf %>%

@@ -56,7 +56,7 @@ setup_modeldata <- function(snoteltoday.sp,phvsnotel,simfsca,SNOW_VAR,PHV_VARS,P
 	newnames=c('Site_ID','longitude','latitude','dte','pillowswe','modscag')
 	snotel_fsca <-
 		raster::extract(simfsca,snoteltoday.sp,sp=T) %>%
-		tbl_df %>%
+		as_tibble %>%
 		setNames(newnames) %>%
 		mutate_if(is.factor,as.character)
 
@@ -82,7 +82,7 @@ setup_modeldata <- function(snoteltoday.sp,phvsnotel,simfsca,SNOW_VAR,PHV_VARS,P
 
 		snotel_rcn <-
 			raster::extract(snow_raster,snoteltoday.sp,sp=T) %>%
-			tbl_df %>%
+			as_tibble %>%
 			dplyr::select(-Longitude, -Latitude, -pillowswe) %>% #remove pillowswe so we don't run into troubel when we join below and scale the swe value
 			mutate_if(is.factor,as.character) %>%
 			gather(rdate,rcn,-Site_ID:-dte)
@@ -204,7 +204,7 @@ setup_modeldata <- function(snoteltoday.sp,phvsnotel,simfsca,SNOW_VAR,PHV_VARS,P
 
 	# save model information to file
 	options(warn=-1)
-	fileConn <- file(file.path(PATH_OUTPUT,paste0('modeldata_',datestr,'.txt')), open='w')
+	fileConn <- file(file.path(PATH_OUTPUT,paste0('modeldata_',datestr,'.txt')), open='wt')
 	writeLines(paste0('# SWE Regression for ',simdate,' in the ',RUNNAME,' domain'),fileConn)
 	writeLines(paste0('# predicted with SNOW_VAR: ',SNOW_VAR),fileConn)
 	writeLines(paste0('# historical recon date used: ', strptime(bestrdate,'X%Y%m%d')), fileConn)
@@ -215,12 +215,12 @@ setup_modeldata <- function(snoteltoday.sp,phvsnotel,simfsca,SNOW_VAR,PHV_VARS,P
 	writeLines(forFile(line5), fileConn)
 	writeLines('#',fileConn)
 	writeLines('# This is the model data (columns lat/lon are for the pixel):', fileConn)
-	readr::write_tsv(data4gis %>% tbl_df %>% filter(!(Site_ID %in% pred_dropped)), path=fileConn, col_names=T, append=T)
+	readr::write_tsv(data4gis %>% as_tibble %>% filter(!(Site_ID %in% pred_dropped)), file=fileConn, col_names=T, append=T)
 	close(fileConn)
 	options(warn = 0)
 
 	## combine snow variable with phv data for the domain for subsequent prediction ----
-	predictdF <- bind_cols(ucophv,raster::as.data.frame(snowpred_raster) %>% setNames(SNOW_VAR)) %>% tbl_df
+	predictdF <- bind_cols(ucophv,raster::as.data.frame(snowpred_raster) %>% setNames(SNOW_VAR)) %>% as_tibble
 
 	return(list(doidata,predictdF,myformula))
 }

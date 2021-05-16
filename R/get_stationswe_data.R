@@ -1,6 +1,6 @@
 #' download and combine station data
 #'
-#' @param station_locs tbl_df of site metadata
+#' @param station_locs tibble of site metadata
 #' @param network default snotel
 #' @export
 #' @return tibble with station data from nrcs
@@ -33,7 +33,7 @@ get_stationswe_data <- function(station_locs,network){
 				},
 					error = function(e){
 					print(paste0('error reading ',fn))
-					data_frame()
+					tibble()
 				})
 		}
 
@@ -54,7 +54,7 @@ get_stationswe_data <- function(station_locs,network){
 					separate(fn,into=c('network','Site_ID','dtestr'),sep='_',remove=TRUE)
 
 				}, error = function(e){
-					data_frame()
+					tibble()
 				})
 		}
 
@@ -107,10 +107,10 @@ get_stationswe_data <- function(station_locs,network){
 	dat <- map_df(fns,import_data,.id=NULL)
 
 	if(length(unique(dat$Site_ID))!=length(siteIDs)){
-		print(paste0(' - Site data did not download correctly: ',siteIDs[!(siteIDs %in% dat$Site_ID)],collapse=', '))
+		print('WARNING: Data for all sites was not processed.')
 	}
 
-	print(' - done reading files')
+	print('Done reading files.')
 
 	dat2=right_join(station_locs,
 								 dat,by=c('Site_ID'))
