@@ -43,15 +43,26 @@ Install R if you haven't:
 https://cran.r-project.org -> Download R for Linux -> Ubuntu (but pick your distribution if not ubuntu) -> follow instructions
 
 commandline:
+
+add ubuntugis rep
 ```
-sudo apt install --no-install-recommends r-base r-cran-devtools libcurl4-openssl-dev pandoc zlibc r-cran-gdalUtils r-cran-glmnetUtils r-cran-raster r-cran-tidyverse r-cran-ncdf4
+sudo add-apt-repository ppa:ubuntugis/ppa
+sudo apt-get update
+```
+Install gdal
+```
+sudo apt install libgdal-dev
+sudo apt install --no-install-recommends r-base r-cran-devtools libcurl4-openssl-dev pandoc  r-cran-raster r-cran-tidyverse r-cran-ncdf4
 ```
 
 Install RStudio for your R interface
 https://www.rstudio.com/products/rstudio/download/#download
 
-Then open R and run `devtools::install_github("hoargroup/stationsweRegression", build_vignettes = TRUE)`
-
+Then open R and install
+```
+install.packages(c('gdalUtils','glmnetUtils','rgdal'))
+devtools::install_github("hoargroup/stationsweRegression", build_vignettes = TRUE)
+```
 
 ## Usage
 
